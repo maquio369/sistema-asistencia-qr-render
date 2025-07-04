@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-!!cc&lrmf-k)4$)#+7k(00osv62%(($$77wsr5@_vd(lf&)z7=
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1', 
+    'localhost',
+    '*',  # ← Agregar tu dominio ngrok
+]
 
 
 # Application definition
@@ -160,3 +164,27 @@ TIME_ZONE = 'America/Mexico_City'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+
+# Configuración CSRF para ngrok
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://*.ngrok-free.app',  # Permite cualquier dominio ngrok con HTTPS
+    'https://*.ngrok.io',
+    'https://*.ngrok.app',
+    'http://*.ngrok-free.app',   # También permite HTTP por si acaso
+]
+
+# Configuración CORS para ngrok
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "https://9b30-189-129-101-120.ngrok-free.app",  # Tu dominio específico
+]
+
+# Permitir cookies en subdominios
+CORS_ALLOW_CREDENTIALS = True
+
+# Configuración adicional para ngrok
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None

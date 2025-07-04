@@ -13,231 +13,370 @@
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
             color: #333;
         }
         
         .header {
-            background: rgba(255,255,255,0.95);
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
+            padding: 25px 0;
+            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
+            margin-bottom: 40px;
         }
         
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
-        .header h1 {
-            color: #333;
-            font-size: 2.5em;
-        }
-        
-        .user-info {
+        .logo-section {
             display: flex;
             align-items: center;
             gap: 15px;
         }
         
+        .geometric-logo {
+            width: 50px;
+            height: 50px;
+            position: relative;
+        }
+        
+        .geometric-logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 25px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            transform: rotate(45deg);
+        }
+        
+        .geometric-logo::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 0;
+            width: 25px;
+            height: 25px;
+            background: #E91E63;
+            transform: rotate(45deg);
+        }
+        
+        .header-title {
+            color: white;
+            font-size: 2.2em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
         .user-welcome {
             text-align: right;
+            color: white;
         }
         
         .user-name {
-            font-weight: bold;
-            color: #333;
+            font-weight: 600;
+            font-size: 1.1em;
+            margin-bottom: 3px;
         }
         
         .user-role {
             font-size: 0.9em;
-            color: #666;
+            opacity: 0.9;
+        }
+        
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 30px;
         }
         
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .dashboard-card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
+        .welcome-section {
             text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .welcome-title {
+            font-size: 2.5em;
+            color: #333;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-subtitle {
+            font-size: 1.2em;
+            color: #666;
+            font-weight: 400;
+        }
+        
+       .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);  /* 4 columnas iguales */
+    gap: 25px;
+    max-width: 1400px;  /* Ancho aumentado para acomodar 4 cards */
+    margin: 0 auto;
+}
+        
+       .dashboard-card {
+    background: white;
+    border-radius: 20px;
+    padding: 35px 25px;  /* Padding ajustado para cards más estrechas */
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.4s ease;
+    border: 1px solid rgba(0, 166, 147, 0.1);
+    position: relative;
+    overflow: hidden;
+    min-height: 320px;  /* Altura mínima para uniformidad */
+}
+        
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00A693, #E91E63);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
         }
         
         .dashboard-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 166, 147, 0.15);
         }
         
-        .card-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
         }
         
-        .card-title {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+.card-icon {
+    width: 70px;  /* Icono ligeramente más pequeño */
+    height: 70px;
+    margin: 0 auto 20px;  /* Margen reducido */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;  /* Tamaño de icono ajustado */
+    transition: all 0.4s ease;
+}
+        
+        .card-registrar .card-icon {
+            background: linear-gradient(135deg, #00A693, #00BFA5);
+            color: white;
+        }
+        
+        .card-escaner .card-icon {
+            background: linear-gradient(135deg, #E91E63, #F06292);
+            color: white;
+        }
+        
+        .card-panel .card-icon {
+            background: linear-gradient(135deg, #2196F3, #42A5F5);
+            color: white;
+        }
+        
+        .card-lista .card-icon {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+            color: white;
+        }
+        
+        .dashboard-card:hover .card-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+.card-title {
+    font-size: 1.3em;  /* Título ligeramente más pequeño */
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.card-description {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.9em;  /* Texto más compacto */
+    line-height: 1.4;
+}
+
+        
+        .card-btn {
+            background: linear-gradient(135deg, #00A693, #00BFA5);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-escaner .card-btn {
+            background: linear-gradient(135deg, #E91E63, #F06292);
+        }
+        
+        .card-panel .card-btn {
+            background: linear-gradient(135deg, #2196F3, #42A5F5);
+        }
+        
+        .card-lista .card-btn {
+            background: linear-gradient(135deg, #FF9800, #FFB74D);
+        }
+        
+        .card-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            filter: brightness(1.1);
+        }
+        
+        .stats-summary {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 50px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #00A693;
+        }
+        
+        .stats-title {
+            text-align: center;
+            font-size: 1.5em;
             color: #333;
-        }
-        
-        .card-description {
-            color: #666;
-            margin-bottom: 20px;
-            font-size: 0.9em;
+            margin-bottom: 25px;
+            font-weight: 600;
         }
         
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-            margin-bottom: 30px;
         }
         
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        .stat-item {
             text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            background: #00A693;
+            color: white;
+            transform: translateY(-3px);
         }
         
         .stat-number {
             font-size: 2.5em;
-            font-weight: bold;
+            font-weight: 700;
             margin-bottom: 5px;
+            color: #00A693;
+        }
+        
+        .stat-item:hover .stat-number {
+            color: white;
         }
         
         .stat-label {
-            color: #666;
-            font-size: 1em;
-        }
-        
-        .stat-invitados { border-left: 5px solid #007bff; }
-        .stat-asistentes { border-left: 5px solid #28a745; }
-        .stat-porcentaje { border-left: 5px solid #ffc107; }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            font-weight: bold;
-        }
-        
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .recent-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .section-title {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            color: #333;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 10px;
-        }
-        
-        .invitado-item {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            margin: 8px 0;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .foto-mini {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 12px;
-        }
-        
-        .foto-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #dee2e6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-        }
-        
-        .invitado-info {
-            flex-grow: 1;
-        }
-        
-        .invitado-nombre {
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-        
-        .invitado-puesto {
-            color: #666;
             font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
         }
         
-        @media (max-width: 768px) {
+        .stat-item:hover .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .dashboard-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+        .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+        
+        @media (max-width: 1200px) {
             .header-content {
                 flex-direction: column;
-                gap: 15px;
+                gap: 20px;
+                text-align: center;
             }
             
-            .dashboard-grid {
+                .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);  /* 2x2 en pantallas medianas */
+        gap: 20px;
+    }
+            
+            .welcome-title {
+                font-size: 2em;
+            }
+            
+            .container {
+                padding: 0 20px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -246,90 +385,62 @@
 <body>
     <div class="header">
         <div class="header-content">
-            <h1>🎫 {{ titulo }}</h1>
+            <div class="logo-section">
+                <div class="geometric-logo"></div>
+                <div>
+                    <div class="header-title">Sistema QR</div>
+                    <div class="header-subtitle">Control de Asistencia Ejecutivo</div>
+                </div>
+            </div>
+            
             <div class="user-info">
                 <div class="user-welcome">
                     <div class="user-name">{{ usuario.get_full_name|default:usuario.username }}</div>
                     <div class="user-role">{% if usuario.is_superuser %}Administrador{% else %}Usuario{% endif %}</div>
                 </div>
-                <a href="{% url 'logout' %}" class="btn btn-danger">Cerrar Sesión</a>
+                <a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
             </div>
         </div>
     </div>
     
     <div class="container">
-        <!-- Estadísticas principales -->
-        <div class="stats-grid">
-            <div class="stat-card stat-invitados">
-                <div class="stat-number">{{ total_invitados }}</div>
-                <div class="stat-label">Total Invitados</div>
-            </div>
-            
-            <div class="stat-card stat-asistentes">
-                <div class="stat-number">{{ total_asistentes }}</div>
-                <div class="stat-label">Han Asistido</div>
-            </div>
-            
-            <div class="stat-card stat-porcentaje">
-                <div class="stat-number">{{ porcentaje_asistencia }}%</div>
-                <div class="stat-label">% Asistencia</div>
-            </div>
+        <div class="welcome-section">
+            <h1 class="welcome-title">Panel de Control</h1>
+            <p class="welcome-subtitle">Gestión integral de eventos y asistencia</p>
         </div>
         
         <!-- Acciones principales -->
         <div class="dashboard-grid">
-            <div class="dashboard-card">
+            <div class="dashboard-card card-registrar">
                 <div class="card-icon">📝</div>
                 <h3 class="card-title">Registrar Invitado</h3>
-                <p class="card-description">Crear nuevo invitado y generar su código QR automáticamente</p>
-                <a href="{% url 'crear_invitado' %}" class="btn btn-primary">Crear Invitado</a>
+                <p class="card-description">Crear nuevos invitados y generar códigos QR personalizados automáticamente</p>
+                <a href="{% url 'crear_invitado' %}" class="card-btn">Crear Invitado</a>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card card-escaner">
                 <div class="card-icon">📷</div>
                 <h3 class="card-title">Escáner QR</h3>
-                <p class="card-description">Escanear códigos QR para registrar asistencia en tiempo real</p>
-                <a href="{% url 'escaner_qr' %}" class="btn btn-success">Abrir Escáner</a>
+                <p class="card-description">Escanear códigos QR en tiempo real para registrar asistencia al evento</p>
+                <a href="{% url 'escaner_qr' %}" class="card-btn">Abrir Escáner</a>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card card-panel">
                 <div class="card-icon">📊</div>
                 <h3 class="card-title">Panel de Control</h3>
-                <p class="card-description">Ver estadísticas detalladas y control administrativo</p>
-                <a href="{% url 'panel_control' %}" class="btn btn-info">Ver Panel</a>
+                <p class="card-description">Monitoreo en tiempo real con estadísticas detalladas y control administrativo</p>
+                <a href="{% url 'panel_control' %}" class="card-btn">Ver Panel</a>
             </div>
             
-            <div class="dashboard-card">
+            <div class="dashboard-card card-lista">
                 <div class="card-icon">👥</div>
                 <h3 class="card-title">Lista de Invitados</h3>
-                <p class="card-description">Ver todos los invitados registrados y sus códigos QR</p>
-                <a href="{% url 'lista_invitados' %}" class="btn btn-secondary">Ver Lista</a>
+                <p class="card-description">Visualizar todos los invitados registrados y acceder a sus códigos QR</p>
+                <a href="{% url 'lista_invitados' %}" class="card-btn">Ver Lista</a>
             </div>
         </div>
         
-        <!-- Invitados recientes -->
-        {% if invitados_recientes %}
-        <div class="recent-section">
-            <h2 class="section-title">👥 Últimos Invitados Registrados</h2>
-            
-            {% for invitado in invitados_recientes %}
-                <div class="invitado-item">
-                    {% if invitado.fotografia %}
-                        <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto-mini">
-                    {% else %}
-                        <div class="foto-placeholder">👤</div>
-                    {% endif %}
-                    
-                    <div class="invitado-info">
-                        <div class="invitado-nombre">{{ invitado.nombre_completo }}</div>
-                        <div class="invitado-puesto">{{ invitado.puesto_cargo }}</div>
-                    </div>
-                    
-                    <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn btn-primary" style="font-size: 0.8em; padding: 8px 15px;">Ver QR</a>
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
+      
     </div>
 </body>
 </html>

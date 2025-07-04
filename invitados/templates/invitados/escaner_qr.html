@@ -5,23 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ titulo }}</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             min-height: 100vh;
+            color: #333;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
+            padding: 12px 0;
+            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
+            margin-bottom: 25px;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .geometric-logo {
+            width: 50px;
+            height: 50px;
+            position: relative;
+        }
+        
+        .geometric-logo::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 25px;
+            height: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            transform: rotate(45deg);
+        }
+        
+        .geometric-logo::after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: 0;
+            width: 25px;
+            height: 25px;
+            background: #E91E63;
+            transform: rotate(45deg);
+        }
+        
+        .header-title {
             color: white;
+            font-size: 2.2em;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .header-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+        
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-        }
-        
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
+            padding: 0 30px;
         }
         
         .scanner-section {
@@ -34,82 +116,106 @@
         .camera-container {
             background: white;
             border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-top: 3px solid #00A693;
         }
         
         .result-container {
-            background: rgba(255,255,255,0.1);
+            background: white;
             border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-top: 3px solid #E91E63;
+        }
+        
+        .section-title {
+            font-size: 1.4em;
+            margin-bottom: 18px;
+            color: #333;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         #qr-reader {
             width: 100%;
             border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid rgba(0, 166, 147, 0.2);
         }
         
         .controls {
-            margin: 20px 0;
+            margin: 15px 0;
             text-align: center;
         }
         
         .btn {
-            padding: 12px 24px;
+            padding: 12px 25px;
             margin: 5px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-weight: 600;
         }
         
         .btn-primary {
-            background: #007bff;
+            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
             color: white;
+            box-shadow: 0 3px 12px rgba(0, 166, 147, 0.3);
         }
         
         .btn-primary:hover {
-            background: #0056b3;
             transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 166, 147, 0.4);
         }
         
         .btn-danger {
-            background: #dc3545;
+            background: linear-gradient(135deg, #E91E63, #F06292);
             color: white;
+            box-shadow: 0 3px 12px rgba(233, 30, 99, 0.3);
         }
         
         .btn-danger:hover {
-            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 30, 99, 0.4);
         }
         
         .result-card {
-            background: white;
+            background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
             margin: 10px 0;
-            color: #333;
             text-align: center;
             min-height: 200px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
         }
         
         .success {
-            border-left: 5px solid #28a745;
-            background: #d4edda;
+            border-color: #28a745;
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
         }
         
         .error {
-            border-left: 5px solid #dc3545;
-            background: #f8d7da;
+            border-color: #dc3545;
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
         }
         
         .warning {
-            border-left: 5px solid #ffc107;
-            background: #fff3cd;
+            border-color: #ffc107;
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+        }
+        
+        .loading {
+            border-color: #00A693;
+            background: linear-gradient(135deg, rgba(0, 166, 147, 0.1), rgba(0, 166, 147, 0.05));
         }
         
         .foto-invitado {
@@ -118,13 +224,15 @@
             border-radius: 50%;
             object-fit: cover;
             margin: 10px auto;
+            border: 3px solid #00A693;
         }
         
         .stats-container {
-            background: rgba(255,255,255,0.1);
+            background: white;
             border-radius: 15px;
-            padding: 20px;
-            backdrop-filter: blur(10px);
+            padding: 25px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+            border-top: 3px solid #2196F3;
         }
         
         .stats-grid {
@@ -135,42 +243,52 @@
         }
         
         .stat-card {
-            background: rgba(255,255,255,0.2);
+            background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
             text-align: center;
+            transition: all 0.3s ease;
+            border-left: 3px solid #00A693;
+        }
+        
+        .stat-card:hover {
+            background: #00A693;
+            color: white;
+            transform: translateY(-3px);
         }
         
         .stat-number {
-            font-size: 2.5em;
-            font-weight: bold;
+            font-size: 2em;
+            font-weight: 700;
             margin-bottom: 5px;
+            color: #00A693;
+        }
+        
+        .stat-card:hover .stat-number {
+            color: white;
         }
         
         .stat-label {
-            font-size: 1.1em;
-            opacity: 0.9;
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
         }
         
-        .loading {
+        .stat-card:hover .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .camera-status {
             text-align: center;
             color: #666;
-        }
-        
-        @media (max-width: 768px) {
-            .scanner-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
+            margin-top: 10px;
+            font-size: 0.9em;
         }
         
         .status-indicator {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
             margin-right: 8px;
         }
@@ -189,19 +307,99 @@
             50% { opacity: 0.5; }
             100% { opacity: 1; }
         }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .camera-container {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .result-container {
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: 0.2s;
+        }
+        
+        .stats-container {
+            animation: fadeInUp 0.6s ease forwards;
+            animation-delay: 0.4s;
+        }
+        
+        #ultimas-llegadas h4 {
+            margin: 15px 0 10px 0;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        .llegadas-item {
+            background: #f8f9fa;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 10px;
+            border-left: 3px solid #E91E63;
+            transition: all 0.3s ease;
+        }
+        
+        .llegadas-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .scanner-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🎫 {{ titulo }}</h1>
-            <p>Escanea los códigos QR para registrar la asistencia</p>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo-section">
+                <div class="geometric-logo"></div>
+                <div>
+                    <div class="header-title">Escáner QR</div>
+                    <div class="header-subtitle">Control de Asistencia en Tiempo Real</div>
+                </div>
+            </div>
+            
+            <a href="{% url 'dashboard' %}" class="back-btn">← Volver al Dashboard</a>
         </div>
-        
+    </div>
+    
+    <div class="container">
         <div class="scanner-section">
             <!-- Sección de cámara -->
             <div class="camera-container">
-                <h3 style="color: #333; margin-top: 0;">📷 Escáner de Cámara</h3>
+                <h3 class="section-title">📷 Escáner de Cámara</h3>
                 <div id="qr-reader"></div>
                 
                 <div class="controls">
@@ -214,18 +412,18 @@
                     </button>
                 </div>
                 
-                <div id="camera-status" style="text-align: center; color: #666; margin-top: 10px;">
+                <div id="camera-status" class="camera-status">
                     Presiona "Iniciar Escáner" para comenzar
                 </div>
             </div>
             
             <!-- Sección de resultados -->
             <div class="result-container">
-                <h3>📋 Resultado del Escaneo</h3>
+                <h3 class="section-title">📋 Resultado del Escaneo</h3>
                 <div id="scan-result">
-                    <div class="result-card">
-                        <div class="loading">
-                            <p>🔍 Esperando escaneo...</p>
+                    <div class="result-card loading">
+                        <div>
+                            <p><strong>🔍 Esperando escaneo...</strong></p>
                             <small>Coloca el código QR frente a la cámara</small>
                         </div>
                     </div>
@@ -235,7 +433,7 @@
         
         <!-- Sección de estadísticas -->
         <div class="stats-container">
-            <h3>📊 Estadísticas en Tiempo Real</h3>
+            <h3 class="section-title">📊 Estadísticas en Tiempo Real</h3>
             <div class="stats-grid" id="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="total-invitados">-</div>
@@ -264,143 +462,9 @@
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     
     <script>
-        // 🔄 AUTO-POLLING para actualizaciones en tiempo real
-        let pollingInterval;
-        let lastUpdateTime = 0;
-        
-        function startPolling() {
-            // Polling cada 3 segundos
-            pollingInterval = setInterval(() => {
-                updateStats();
-            }, 3000);
-            
-            console.log('🔄 Polling iniciado - actualizaciones cada 3 segundos');
-        }
-        
-        function stopPolling() {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-                console.log('⏹️ Polling detenido');
-            }
-        }
-        
-        // Función mejorada para actualizar estadísticas
-        async function updateStats() {
-            try {
-                const response = await fetch(ESTADISTICAS_URL);
-                const data = await response.json();
-                
-                // Actualizar estadísticas con animaciones
-                updateStatWithAnimation('total-invitados', data.total_invitados);
-                updateStatWithAnimation('total-asistentes', data.total_asistentes);
-                updateStatWithAnimation('porcentaje-asistencia', `${data.porcentaje_asistencia}%`);
-                
-                // Actualizar llegadas
-                updateLlegadas(data.ultimas_llegadas);
-                
-            } catch (error) {
-                console.error('Error al actualizar estadísticas:', error);
-            }
-        }
-        
-        function updateStatWithAnimation(elementId, newValue) {
-            const element = document.getElementById(elementId);
-            const currentValue = element.textContent;
-            
-            if (currentValue !== newValue.toString()) {
-                element.style.transform = 'scale(1.1)';
-                element.style.transition = 'transform 0.3s ease';
-                element.textContent = newValue;
-                
-                setTimeout(() => {
-                    element.style.transform = 'scale(1)';
-                }, 300);
-                
-                // Mostrar notificación de cambio
-                showChangeNotification(`Estadísticas actualizadas`);
-            }
-        }
-        
-        function updateLlegadas(llegadas) {
-            const container = document.getElementById('llegadas-lista');
-            
-            if (llegadas.length > 0) {
-                let llegadasHtml = '';
-                llegadas.forEach((llegada, index) => {
-                    llegadasHtml += `
-                        <div style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 8px; animation: slideIn 0.5s ease ${index * 0.1}s both;">
-                            <strong>${llegada.nombre}</strong> - ${llegada.puesto}<br>
-                            <small>⏰ ${llegada.hora}</small>
-                        </div>
-                    `;
-                });
-                container.innerHTML = llegadasHtml;
-            } else {
-                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay llegadas registradas</p>';
-            }
-        }
-        
-        function showChangeNotification(message) {
-            // Buscar si ya existe una notificación
-            let existingNotification = document.getElementById('change-notification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-            
-            // Crear nueva notificación
-            const notification = document.createElement('div');
-            notification.id = 'change-notification';
-            notification.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background: #28a745;
-                color: white;
-                padding: 10px 15px;
-                border-radius: 8px;
-                font-size: 14px;
-                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-                z-index: 10000;
-                animation: slideInUp 0.3s ease;
-            `;
-            notification.textContent = message;
-            
-            document.body.appendChild(notification);
-            
-            // Remover después de 2 segundos
-            setTimeout(() => {
-                notification.style.animation = 'slideOutDown 0.3s ease';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 2000);
-        }
-        
-        // CSS para animaciones
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInUp {
-                from { transform: translateY(100%); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-            
-            @keyframes slideOutDown {
-                from { transform: translateY(0); opacity: 1; }
-                to { transform: translateY(100%); opacity: 0; }
-            }
-            
-            @keyframes slideIn {
-                from { transform: translateY(-10px); opacity: 0; }
-                to { transform: translateY(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Variables originales del escáner
         let html5QrCode;
         let isScanning = false;
+        let pollingInterval;
         
         // URLs para AJAX
         const PROCESAR_QR_URL = '/procesar-qr/';
@@ -424,7 +488,7 @@
                 cameraStatus.textContent = 'Iniciando cámara...';
                 
                 await html5QrCode.start(
-                    { facingMode: "environment" }, // Cámara trasera preferida
+                    { facingMode: "environment" },
                     {
                         fps: 10,
                         qrbox: { width: 250, height: 250 }
@@ -437,8 +501,10 @@
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'inline-block';
                 statusIndicator.className = 'status-indicator status-scanning';
-                startBtn.innerHTML = '<span class="status-indicator status-scanning" id="status-indicator"></span> Escaneando...';
                 cameraStatus.textContent = '✅ Cámara activa - Escanea un código QR';
+                
+                // Iniciar polling de estadísticas
+                startPolling();
                 
             } catch (err) {
                 console.error('Error al iniciar cámara:', err);
@@ -455,8 +521,8 @@
                 startBtn.style.display = 'inline-block';
                 stopBtn.style.display = 'none';
                 statusIndicator.className = 'status-indicator status-stopped';
-                startBtn.innerHTML = '<span class="status-indicator status-stopped"></span> Iniciar Escáner';
                 cameraStatus.textContent = '⏹️ Escáner detenido';
+                stopPolling();
             } catch (err) {
                 console.error('Error al detener cámara:', err);
             }
@@ -466,7 +532,6 @@
         async function onScanSuccess(decodedText) {
             console.log('QR escaneado:', decodedText);
             
-            // Mostrar resultado de carga
             showResult('loading', '⏳ Procesando...', 'Verificando código QR...');
             
             try {
@@ -486,7 +551,6 @@
                 if (data.success) {
                     showResult('success', '✅ ¡Acceso Autorizado!', 
                         `Bienvenido ${data.invitado.nombre}`, data.invitado);
-                    // Actualizar estadísticas
                     updateStats();
                 } else {
                     let errorMsg = data.message || 'Error desconocido';
@@ -536,9 +600,9 @@
             setTimeout(() => {
                 if (isScanning) {
                     scanResult.innerHTML = `
-                        <div class="result-card">
-                            <div class="loading">
-                                <p>🔍 Esperando próximo escaneo...</p>
+                        <div class="result-card loading">
+                            <div>
+                                <p><strong>🔍 Esperando próximo escaneo...</strong></p>
                             </div>
                         </div>
                     `;
@@ -546,24 +610,80 @@
             }, 5000);
         }
         
+        // Funciones de polling
+        function startPolling() {
+            pollingInterval = setInterval(() => {
+                updateStats();
+            }, 3000);
+            console.log('🔄 Polling iniciado - actualizaciones cada 3 segundos');
+        }
+        
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                console.log('⏹️ Polling detenido');
+            }
+        }
+        
+        // Actualizar estadísticas
+        async function updateStats() {
+            try {
+                const response = await fetch(ESTADISTICAS_URL);
+                const data = await response.json();
+                
+                updateStatWithAnimation('total-invitados', data.total_invitados);
+                updateStatWithAnimation('total-asistentes', data.total_asistentes);
+                updateStatWithAnimation('porcentaje-asistencia', `${data.porcentaje_asistencia}%`);
+                
+                updateLlegadas(data.ultimas_llegadas);
+                
+            } catch (error) {
+                console.error('Error al actualizar estadísticas:', error);
+            }
+        }
+        
+        function updateStatWithAnimation(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = element.textContent;
+            
+            if (currentValue !== newValue.toString()) {
+                element.style.transform = 'scale(1.1)';
+                element.style.transition = 'transform 0.3s ease';
+                element.textContent = newValue;
+                
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 300);
+            }
+        }
+        
+        function updateLlegadas(llegadas) {
+            const container = document.getElementById('llegadas-lista');
+            
+            if (llegadas.length > 0) {
+                let llegadasHtml = '';
+                llegadas.forEach((llegada, index) => {
+                    llegadasHtml += `
+                        <div class="llegadas-item" style="animation: fadeInUp 0.5s ease ${index * 0.1}s both;">
+                            <strong>${llegada.nombre}</strong> - ${llegada.puesto}<br>
+                            <small>⏰ ${llegada.hora}</small>
+                        </div>
+                    `;
+                });
+                container.innerHTML = llegadasHtml;
+            } else {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay llegadas registradas</p>';
+            }
+        }
+        
         // Event listeners
         startBtn.addEventListener('click', startScanner);
         stopBtn.addEventListener('click', stopScanner);
         
-        // Inicializar polling al cargar la página
+        // Inicializar
         document.addEventListener('DOMContentLoaded', function() {
             initializeScanner();
             updateStats(); // Cargar estadísticas iniciales
-            startPolling(); // Iniciar polling automático
-        });
-        
-        // Pausar polling cuando la página no está visible
-        document.addEventListener('visibilitychange', function() {
-            if (document.hidden) {
-                stopPolling();
-            } else {
-                startPolling();
-            }
         });
     </script>
 </body>

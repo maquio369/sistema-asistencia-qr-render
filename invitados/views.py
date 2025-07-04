@@ -63,6 +63,7 @@ def dashboard(request):
     
     # Invitados recientes
     invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:3]
+ 
     
     context = {
         'titulo': 'Dashboard - Sistema QR',
@@ -326,7 +327,7 @@ def crear_invitado(request):
     
     # Estadísticas para mostrar en la página
     total_invitados = Invitado.objects.count()
-    invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:5]
+    invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:3]  # ← Solo 3 registros
     
     context = {
         'form': form,
