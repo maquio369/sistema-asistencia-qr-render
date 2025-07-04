@@ -11,8 +11,69 @@ from django.db.models import Count
 from django.http import HttpResponse
 import csv
 from datetime import datetime
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
+from .forms import CustomLoginForm
+from .forms import InvitadoForm
+from django.contrib import messages
 
 
+def login_view(request):
+    """Vista para el login"""
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    
+    if request.method == 'POST':
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            
+            # Redirigir según el usuario
+            next_url = request.GET.get('next', 'dashboard')
+            messages.success(request, f'¡Bienvenido {user.get_full_name() or user.username}!')
+            return redirect(next_url)
+        else:
+            messages.error(request, 'Usuario o contraseña incorrectos.')
+    else:
+        form = CustomLoginForm()
+    
+    context = {
+        'form': form,
+        'titulo': 'Iniciar Sesión - Sistema QR'
+    }
+    
+    return render(request, 'invitados/login.html', context)
+
+def logout_view(request):
+    """Vista para cerrar sesión"""
+    logout(request)
+    messages.success(request, 'Sesión cerrada exitosamente.')
+    return redirect('login')
+
+@login_required
+def dashboard(request):
+    """Panel principal después del login"""
+    # Estadísticas generales
+    total_invitados = Invitado.objects.count()
+    total_asistentes = Invitado.objects.filter(asistio=True).count()
+    porcentaje_asistencia = (total_asistentes / total_invitados * 100) if total_invitados > 0 else 0
+    
+    # Invitados recientes
+    invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:3]
+    
+    context = {
+        'titulo': 'Dashboard - Sistema QR',
+        'total_invitados': total_invitados,
+        'total_asistentes': total_asistentes,
+        'porcentaje_asistencia': round(porcentaje_asistencia, 1),
+        'invitados_recientes': invitados_recientes,
+        'usuario': request.user,
+    }
+    
+    return render(request, 'invitados/dashboard.html', context)
 
 
 def mostrar_qr(request, token):
@@ -175,7 +236,7 @@ import csv
 from datetime import datetime
 
 # Agregar esta vista
-@staff_member_required
+@login_required
 def panel_control(request):
     """Panel de control administrativo"""
     # Estadísticas generales
@@ -204,7 +265,7 @@ def panel_control(request):
     
     return render(request, 'invitados/panel_control.html', context)
 
-@staff_member_required
+@login_required
 def exportar_asistencia_csv(request):
     """Exportar lista de asistencia a CSV"""
     response = HttpResponse(content_type='text/csv')
@@ -241,3 +302,48 @@ def exportar_asistencia_csv(request):
 def offline_page(request):
     """Página para mostrar cuando no hay conexión"""
     return render(request, 'pwa/offline.html')
+
+
+@login_required
+def crear_invitado(request):
+    """Vista para crear nuevo invitado via formulario web"""
+    if request.method == 'POST':
+        form = InvitadoForm(request.POST, request.FILES)
+        if form.is_valid():
+            try:
+                invitado = form.save()
+                messages.success(
+                    request, 
+                    f'✅ Invitado "{invitado.nombre_completo}" creado exitosamente. QR generado automáticamente.'
+                )
+                return redirect('crear_invitado')
+            except Exception as e:
+                messages.error(request, f'❌ Error al crear invitado: {str(e)}')
+        else:
+            messages.error(request, '❌ Por favor corrige los errores en el formulario.')
+    else:
+        form = InvitadoForm()
+    
+    # Estadísticas para mostrar en la página
+    total_invitados = Invitado.objects.count()
+    invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:5]
+    
+    context = {
+        'form': form,
+        'titulo': 'Registrar Nuevo Invitado',
+        'total_invitados': total_invitados,
+        'invitados_recientes': invitados_recientes,
+    }
+    
+    return render(request, 'invitados/crear_invitado.html', context)
+
+def ver_invitado_qr(request, invitado_id):
+    """Vista para ver el QR de un invitado específico por ID"""
+    invitado = get_object_or_404(Invitado, id=invitado_id)
+    
+    context = {
+        'invitado': invitado,
+        'titulo': f'QR - {invitado.nombre_completo}'
+    }
+    
+    return render(request, 'invitados/mostrar_qr.html', context)
