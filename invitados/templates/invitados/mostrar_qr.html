@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .qr-container {
+            border: 2px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 400px;
+        }
+        .qr-code {
+            max-width: 250px;
+            height: auto;
+            margin: 10px 0;
+        }
+        .info {
+            margin: 10px 0;
+            font-size: 18px;
+        }
+        .foto {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin: 10px 0;
+        }
+        @media print {
+            body { margin: 0; padding: 0; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ titulo }}</h1>
+    
+    <div class="qr-container">
+        {% if invitado.fotografia %}
+            <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto">
+        {% endif %}
+        
+        <div class="info">
+            <strong>{{ invitado.nombre_completo }}</strong>
+        </div>
+        
+        <div class="info">
+            {{ invitado.puesto_cargo }}
+        </div>
+        
+        {% if invitado.qr_imagen %}
+            <img src="{{ invitado.qr_imagen.url }}" alt="Código QR" class="qr-code">
+        {% else %}
+            <p>QR no generado</p>
+        {% endif %}
+        
+        <div class="info" style="font-size: 12px; color: #666;">
+            Token: {{ invitado.token_qr }}
+        </div>
+    </div>
+    
+    <div class="no-print">
+        <button onclick="window.print()">Imprimir QR</button>
+        <a href="{% url 'lista_invitados' %}">← Volver a la lista</a>
+    </div>
+</body>
+</html>

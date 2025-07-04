@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de gestión de asistencia mediante códigos QR">
+    <meta name="theme-color" content="#764ba2">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Asistencia QR">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/pwa/manifest.json">
+    
+    <!-- Iconos para diferentes dispositivos -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icon-72x72.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/pwa/icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/pwa/icon-192x192.png">
+    
+    <title>{% block title %}Sistema de Asistencia QR{% endblock %}</title>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% block content %}{% endblock %}
+    
+    <!-- PWA Install Prompt -->
+    <div id="pwa-install-prompt" style="display: none; position: fixed; bottom: 20px; left: 20px; right: 20px; background: #333; color: white; padding: 15px; border-radius: 10px; z-index: 1000;">
+        <p style="margin: 0 0 10px 0;">📱 ¿Instalar esta aplicación en tu dispositivo?</p>
+        <button id="pwa-install-btn" style="background: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 5px; margin-right: 10px;">Instalar</button>
+        <button id="pwa-dismiss-btn" style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px;">Después</button>
+    </div>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/static/pwa/sw.js', {
+                    scope: '/'
+                })
+                .then(function(registration) {
+                    console.log('✅ Service Worker registrado:', registration.scope);
+                    
+                    // Escuchar actualizaciones
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // Nueva versión disponible
+                                showUpdateAvailable();
+                            }
+                        });
+                    });
+                })
+                .catch(function(error) {
+                    console.log('❌ Error al registrar Service Worker:', error);
+                });
+            });
+        }
+        
+        // PWA Install Prompt
+        let deferredPrompt;
+        const installPrompt = document.getElementById('pwa-install-prompt');
+        const installBtn = document.getElementById('pwa-install-btn');
+        const dismissBtn = document.getElementById('pwa-dismiss-btn');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.style.display = 'block';
+        });
+        
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('PWA install outcome:', outcome);
+                deferredPrompt = null;
+                installPrompt.style.display = 'none';
+            }
+        });
+        
+        dismissBtn.addEventListener('click', () => {
+            installPrompt.style.display = 'none';
+            deferredPrompt = null;
+        });
+        
+        // Detectar cuando la app se instala
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('✅ PWA instalada exitosamente');
+            installPrompt.style.display = 'none';
+        });
+        
+        // Mostrar notificación de actualización
+        function showUpdateAvailable() {
+            if (confirm('🔄 Nueva versión disponible. ¿Actualizar ahora?')) {
+                window.location.reload();
+            }
+        }
+        
+        // Status de conexión
+        function updateOnlineStatus() {
+            const status = navigator.onLine ? 'online' : 'offline';
+            console.log('Estado de conexión:', status);
+        }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

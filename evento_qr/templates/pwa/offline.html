@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sin Conexión - Asistencia QR</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .offline-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            max-width: 500px;
+        }
+        
+        .offline-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+        }
+        
+        .offline-title {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .offline-message {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .retry-btn {
+            background: #28a745;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .retry-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+        
+        .features-offline {
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .feature {
+            margin: 10px 0;
+            opacity: 0.8;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <div class="offline-icon pulse">📡</div>
+        <h1 class="offline-title">Sin Conexión</h1>
+        <p class="offline-message">
+            No hay conexión a Internet en este momento. 
+            La aplicación funcionará en modo offline con funcionalidades limitadas.
+        </p>
+        
+        <button class="retry-btn" onclick="retryConnection()">
+            🔄 Reintentar Conexión
+        </button>
+        
+        <div class="features-offline">
+            <h3>Disponible sin conexión:</h3>
+            <div class="feature">✅ Visualización de páginas visitadas</div>
+            <div class="feature">✅ Interfaz de la aplicación</div>
+            <div class="feature">❌ Escaneo QR (requiere conexión)</div>
+            <div class="feature">❌ Estadísticas en tiempo real</div>
+        </div>
+    </div>
+    
+    <script>
+        function retryConnection() {
+            window.location.reload();
+        }
+        
+        // Auto-retry cada 30 segundos
+        setInterval(() => {
+            if (navigator.onLine) {
+                window.location.reload();
+            }
+        }, 30000);
+        
+        // Escuchar eventos de conexión
+        window.addEventListener('online', () => {
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>

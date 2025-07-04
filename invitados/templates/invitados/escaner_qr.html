@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .scanner-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .camera-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .result-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        #qr-reader {
+            width: 100%;
+            border-radius: 10px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            color: #333;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .success {
+            border-left: 5px solid #28a745;
+            background: #d4edda;
+        }
+        
+        .error {
+            border-left: 5px solid #dc3545;
+            background: #f8d7da;
+        }
+        
+        .warning {
+            border-left: 5px solid #ffc107;
+            background: #fff3cd;
+        }
+        
+        .foto-invitado {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 10px auto;
+        }
+        
+        .stats-container {
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .loading {
+            text-align: center;
+            color: #666;
+        }
+        
+        @media (max-width: 768px) {
+            .scanner-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-scanning {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-stopped {
+            background: #dc3545;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎫 {{ titulo }}</h1>
+            <p>Escanea los códigos QR para registrar la asistencia</p>
+        </div>
+        
+        <div class="scanner-section">
+            <!-- Sección de cámara -->
+            <div class="camera-container">
+                <h3 style="color: #333; margin-top: 0;">📷 Escáner de Cámara</h3>
+                <div id="qr-reader"></div>
+                
+                <div class="controls">
+                    <button id="start-btn" class="btn btn-primary">
+                        <span class="status-indicator status-stopped" id="status-indicator"></span>
+                        Iniciar Escáner
+                    </button>
+                    <button id="stop-btn" class="btn btn-danger" style="display: none;">
+                        Detener Escáner
+                    </button>
+                </div>
+                
+                <div id="camera-status" style="text-align: center; color: #666; margin-top: 10px;">
+                    Presiona "Iniciar Escáner" para comenzar
+                </div>
+            </div>
+            
+            <!-- Sección de resultados -->
+            <div class="result-container">
+                <h3>📋 Resultado del Escaneo</h3>
+                <div id="scan-result">
+                    <div class="result-card">
+                        <div class="loading">
+                            <p>🔍 Esperando escaneo...</p>
+                            <small>Coloca el código QR frente a la cámara</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección de estadísticas -->
+        <div class="stats-container">
+            <h3>📊 Estadísticas en Tiempo Real</h3>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-invitados">-</div>
+                    <div class="stat-label">Total Invitados</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-asistentes">-</div>
+                    <div class="stat-label">Han Asistido</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="porcentaje-asistencia">-%</div>
+                    <div class="stat-label">% Asistencia</div>
+                </div>
+            </div>
+            
+            <div id="ultimas-llegadas">
+                <h4>🕐 Últimas Llegadas</h4>
+                <div id="llegadas-lista">
+                    <p style="text-align: center; opacity: 0.7;">Cargando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Librerías JS -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
+    <script>
+        // 🔄 AUTO-POLLING para actualizaciones en tiempo real
+        let pollingInterval;
+        let lastUpdateTime = 0;
+        
+        function startPolling() {
+            // Polling cada 3 segundos
+            pollingInterval = setInterval(() => {
+                updateStats();
+            }, 3000);
+            
+            console.log('🔄 Polling iniciado - actualizaciones cada 3 segundos');
+        }
+        
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                console.log('⏹️ Polling detenido');
+            }
+        }
+        
+        // Función mejorada para actualizar estadísticas
+        async function updateStats() {
+            try {
+                const response = await fetch(ESTADISTICAS_URL);
+                const data = await response.json();
+                
+                // Actualizar estadísticas con animaciones
+                updateStatWithAnimation('total-invitados', data.total_invitados);
+                updateStatWithAnimation('total-asistentes', data.total_asistentes);
+                updateStatWithAnimation('porcentaje-asistencia', `${data.porcentaje_asistencia}%`);
+                
+                // Actualizar llegadas
+                updateLlegadas(data.ultimas_llegadas);
+                
+            } catch (error) {
+                console.error('Error al actualizar estadísticas:', error);
+            }
+        }
+        
+        function updateStatWithAnimation(elementId, newValue) {
+            const element = document.getElementById(elementId);
+            const currentValue = element.textContent;
+            
+            if (currentValue !== newValue.toString()) {
+                element.style.transform = 'scale(1.1)';
+                element.style.transition = 'transform 0.3s ease';
+                element.textContent = newValue;
+                
+                setTimeout(() => {
+                    element.style.transform = 'scale(1)';
+                }, 300);
+                
+                // Mostrar notificación de cambio
+                showChangeNotification(`Estadísticas actualizadas`);
+            }
+        }
+        
+        function updateLlegadas(llegadas) {
+            const container = document.getElementById('llegadas-lista');
+            
+            if (llegadas.length > 0) {
+                let llegadasHtml = '';
+                llegadas.forEach((llegada, index) => {
+                    llegadasHtml += `
+                        <div style="background: rgba(255,255,255,0.1); padding: 10px; margin: 5px 0; border-radius: 8px; animation: slideIn 0.5s ease ${index * 0.1}s both;">
+                            <strong>${llegada.nombre}</strong> - ${llegada.puesto}<br>
+                            <small>⏰ ${llegada.hora}</small>
+                        </div>
+                    `;
+                });
+                container.innerHTML = llegadasHtml;
+            } else {
+                container.innerHTML = '<p style="text-align: center; opacity: 0.7;">No hay llegadas registradas</p>';
+            }
+        }
+        
+        function showChangeNotification(message) {
+            // Buscar si ya existe una notificación
+            let existingNotification = document.getElementById('change-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Crear nueva notificación
+            const notification = document.createElement('div');
+            notification.id = 'change-notification';
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #28a745;
+                color: white;
+                padding: 10px 15px;
+                border-radius: 8px;
+                font-size: 14px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideInUp 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remover después de 2 segundos
+            setTimeout(() => {
+                notification.style.animation = 'slideOutDown 0.3s ease';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 2000);
+        }
+        
+        // CSS para animaciones
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInUp {
+                from { transform: translateY(100%); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            @keyframes slideOutDown {
+                from { transform: translateY(0); opacity: 1; }
+                to { transform: translateY(100%); opacity: 0; }
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(-10px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Variables originales del escáner
+        let html5QrCode;
+        let isScanning = false;
+        
+        // URLs para AJAX
+        const PROCESAR_QR_URL = '/procesar-qr/';
+        const ESTADISTICAS_URL = '/estadisticas/';
+        
+        // Elementos DOM
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const cameraStatus = document.getElementById('camera-status');
+        const scanResult = document.getElementById('scan-result');
+        
+        // Inicializar escáner
+        function initializeScanner() {
+            html5QrCode = new Html5Qrcode("qr-reader");
+        }
+        
+        // Iniciar escáner
+        async function startScanner() {
+            try {
+                cameraStatus.textContent = 'Iniciando cámara...';
+                
+                await html5QrCode.start(
+                    { facingMode: "environment" }, // Cámara trasera preferida
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 }
+                    },
+                    onScanSuccess,
+                    onScanError
+                );
+                
+                isScanning = true;
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'inline-block';
+                statusIndicator.className = 'status-indicator status-scanning';
+                startBtn.innerHTML = '<span class="status-indicator status-scanning" id="status-indicator"></span> Escaneando...';
+                cameraStatus.textContent = '✅ Cámara activa - Escanea un código QR';
+                
+            } catch (err) {
+                console.error('Error al iniciar cámara:', err);
+                cameraStatus.textContent = `❌ Error: ${err.message}`;
+                showResult('error', '❌ Error de Cámara', 'No se pudo acceder a la cámara. Verifica los permisos.');
+            }
+        }
+        
+        // Detener escáner
+        async function stopScanner() {
+            try {
+                await html5QrCode.stop();
+                isScanning = false;
+                startBtn.style.display = 'inline-block';
+                stopBtn.style.display = 'none';
+                statusIndicator.className = 'status-indicator status-stopped';
+                startBtn.innerHTML = '<span class="status-indicator status-stopped"></span> Iniciar Escáner';
+                cameraStatus.textContent = '⏹️ Escáner detenido';
+            } catch (err) {
+                console.error('Error al detener cámara:', err);
+            }
+        }
+        
+        // Procesar QR escaneado
+        async function onScanSuccess(decodedText) {
+            console.log('QR escaneado:', decodedText);
+            
+            // Mostrar resultado de carga
+            showResult('loading', '⏳ Procesando...', 'Verificando código QR...');
+            
+            try {
+                const response = await fetch(PROCESAR_QR_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token_qr: decodedText,
+                        dispositivo: `Escáner Web - ${new Date().toLocaleString()}`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showResult('success', '✅ ¡Acceso Autorizado!', 
+                        `Bienvenido ${data.invitado.nombre}`, data.invitado);
+                    // Actualizar estadísticas
+                    updateStats();
+                } else {
+                    let errorMsg = data.message || 'Error desconocido';
+                    let errorTitle = '❌ Acceso Denegado';
+                    
+                    if (data.error === 'YA_ESCANEADO') {
+                        errorTitle = '⚠️ Ya Registrado';
+                        showResult('warning', errorTitle, errorMsg, data.invitado);
+                    } else {
+                        showResult('error', errorTitle, errorMsg);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error al procesar QR:', error);
+                showResult('error', '❌ Error de Conexión', 'No se pudo conectar con el servidor');
+            }
+        }
+        
+        function onScanError(errorMessage) {
+            // No mostrar errores de escaneo constantes
+        }
+        
+        // Mostrar resultado en la interfaz
+        function showResult(type, title, message, invitado = null) {
+            let html = `<div class="result-card ${type}">`;
+            
+            if (invitado && invitado.foto) {
+                html += `<img src="${invitado.foto}" alt="Foto" class="foto-invitado">`;
+            }
+            
+            html += `<h3>${title}</h3>`;
+            html += `<p><strong>${message}</strong></p>`;
+            
+            if (invitado) {
+                html += `<p><strong>Puesto:</strong> ${invitado.puesto}</p>`;
+                if (invitado.hora_entrada) {
+                    html += `<p><strong>Hora:</strong> ${invitado.hora_entrada}</p>`;
+                }
+            }
+            
+            html += `</div>`;
+            
+            scanResult.innerHTML = html;
+            
+            // Auto-limpiar después de 5 segundos
+            setTimeout(() => {
+                if (isScanning) {
+                    scanResult.innerHTML = `
+                        <div class="result-card">
+                            <div class="loading">
+                                <p>🔍 Esperando próximo escaneo...</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            }, 5000);
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', startScanner);
+        stopBtn.addEventListener('click', stopScanner);
+        
+        // Inicializar polling al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeScanner();
+            updateStats(); // Cargar estadísticas iniciales
+            startPolling(); // Iniciar polling automático
+        });
+        
+        // Pausar polling cuando la página no está visible
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                stopPolling();
+            } else {
+                startPolling();
+            }
+        });
+    </script>
+</body>
+</html>

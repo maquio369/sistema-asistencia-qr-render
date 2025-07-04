@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ titulo }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .invitado {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .foto {
+            width: 60px;
+            height: 60px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+        .info {
+            flex-grow: 1;
+        }
+        .qr-mini {
+            width: 80px;
+            height: 80px;
+        }
+        .btn {
+            padding: 8px 15px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ titulo }}</h1>
+    
+    {% for invitado in invitados %}
+        <div class="invitado">
+            {% if invitado.fotografia %}
+                <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto">
+            {% endif %}
+            
+            <div class="info">
+                <strong>{{ invitado.nombre_completo }}</strong><br>
+                {{ invitado.puesto_cargo }}<br>
+                <small>Token: {{ invitado.token_qr }}</small>
+            </div>
+            
+            {% if invitado.qr_imagen %}
+                <img src="{{ invitado.qr_imagen.url }}" alt="QR" class="qr-mini">
+            {% else %}
+                <div class="qr-mini" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    Sin QR
+                </div>
+            {% endif %}
+            
+            <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn">Ver QR</a>
+        </div>
+    {% endfor %}
+</body>
+</html>
