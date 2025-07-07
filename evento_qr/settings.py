@@ -189,9 +189,8 @@ CORS_ALLOW_CREDENTIALS = True
 # Configuración adicional para ngrok
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
-
 # ===========================================
-# CONFIGURACIÓN PARA DOCKER - AGREGAR AL FINAL
+# CONFIGURACIÓN PARA DOCKER - AGREGADO
 # ===========================================
 
 # Sobrescribir configuración de base de datos si estamos en Docker
