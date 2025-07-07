@@ -188,3 +188,40 @@ CORS_ALLOW_CREDENTIALS = True
 
 # Configuración adicional para ngrok
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+
+# ===========================================
+# CONFIGURACIÓN PARA DOCKER - AGREGAR AL FINAL
+# ===========================================
+
+# Sobrescribir configuración de base de datos si estamos en Docker
+if os.getenv('DB_HOST'):  # Solo si hay variables de entorno de Docker
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME', 'evento_qr_db'),
+            'USER': os.getenv('DB_USER', 'postgres'),
+            'PASSWORD': os.getenv('DB_PASSWORD', 'Saladin0'),
+            'HOST': os.getenv('DB_HOST', 'db'),  # 'db' para Docker
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
+    }
+    print("🐳 Usando configuración de base de datos para Docker")
+
+# Agregar puertos para Docker al CORS y CSRF
+if os.getenv('DB_HOST'):  # Solo en Docker
+    CORS_ALLOWED_ORIGINS += [
+        "http://localhost:3012",
+        "http://127.0.0.1:3012",
+    ]
+    
+    CSRF_TRUSTED_ORIGINS += [
+        'http://localhost:3012',
+        'http://127.0.0.1:3012',
+    ]
+    
+    # Agregar WhiteNoise para servir archivos estáticos en Docker
+    if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+        MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+    
+    print("🐳 Configuración Docker aplicada - Puerto 3012 habilitado")
