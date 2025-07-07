@@ -32,7 +32,7 @@ services:
       - DB_NAME=evento_qr_db
       - DB_USER=postgres
       - DB_PASSWORD=Saladin0
-      - DJANGO_SETTINGS_MODULE=evento_qr.settings_docker
+      - DJANGO_SETTINGS_MODULE=evento_qr.settings
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
