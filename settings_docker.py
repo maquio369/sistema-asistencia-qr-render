@@ -44,8 +44,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Configuración CORS
+# Configuración CORS - ACTUALIZADO CON PUERTO 3012
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3012",      # ← NUEVO: Puerto 3012
+    "http://127.0.0.1:3012",      # ← NUEVO: Puerto 3012
     "http://localhost:8000",
     "http://127.0.0.1:8000",
     "http://0.0.0.0:8000",
@@ -127,12 +129,14 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-# Configuración CSRF para Docker
+# Configuración CSRF para Docker - ACTUALIZADO CON PUERTO 3012
 CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:3012',      # ← NUEVO: Puerto 3012
+    'http://localhost:3012',      # ← NUEVO: Puerto 3012
     'http://127.0.0.1:8000',
     'http://localhost:8000',
     'http://0.0.0.0:8000',
-    'https://*.ngrok-free.app',  # Para ngrok si lo usas
+    'https://*.ngrok-free.app',   # Para ngrok si lo usas
     'https://*.ngrok.io',
     'https://*.ngrok.app',
     'http://*.ngrok-free.app',
