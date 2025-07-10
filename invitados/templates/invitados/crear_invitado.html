@@ -1,537 +1,604 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-        
-       .header {
-    background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-    padding: 12px 0;  /* ← CAMBIADO: de 25px a 12px */
-    box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
-    margin-bottom: 25px;  /* ← CAMBIADO: de 40px a 25px */
-}
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .geometric-logo {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-        
-        .geometric-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: rotate(45deg);
-        }
-        
-        .geometric-logo::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 25px;
-            height: 25px;
-            background: #E91E63;
-            transform: rotate(45deg);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 2.2em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-        
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
-        }
-        
-       .form-section {
-    background: white;
-    border-radius: 15px;  /* ← CAMBIADO: de 20px a 15px */
-    padding: 25px;  /* ← CAMBIADO: de 40px a 25px */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);  /* ← CAMBIADO: sombra más sutil */
-    border-top: 3px solid #00A693;  /* ← CAMBIADO: de 4px a 3px */
-}
-        
-       .recent-section {
-    background: white;
-    border-radius: 15px;  /* ← CAMBIADO: de 20px a 15px */
-    padding: 25px;  /* ← CAMBIADO: de 40px a 25px */
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);  /* ← CAMBIADO: sombra más sutil */
-    border-top: 3px solid #E91E63;  /* ← CAMBIADO: de 4px a 3px */
-}
-        
-      .section-title {
-    font-size: 1.4em;  /* ← CAMBIADO: de 1.8em a 1.4em */
-    margin-bottom: 18px;  /* ← CAMBIADO: de 25px a 18px */
-    color: #333;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px;  /* ← CAMBIADO: de 10px a 8px */
-}
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #333;
-            font-size: 0.95em;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid rgba(0, 166, 147, 0.3);
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #f8f9fa;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #00A693;
-            box-shadow: 0 0 0 4px rgba(0, 166, 147, 0.1);
-            transform: translateY(-2px);
-            background: white;
-        }
-        
-        .help-text {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 5px;
-        }
-        
-        .btn {
-            padding: 15px 30px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 166, 147, 0.3);
-            width: 100%;
-        }
-        
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 166, 147, 0.4);
-            filter: brightness(1.1);
-        }
-        
-        .alert {
-            padding: 15px 20px;
-            margin-bottom: 25px;
-            border-radius: 12px;
-            font-weight: 500;
-            border-left: 4px solid;
-        }
-        
-        .alert-success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #2E7D32;
-            border-left-color: #4CAF50;
-        }
-        
-        .alert-error {
-            background: rgba(239, 83, 80, 0.1);
-            color: #C62828;
-            border-left-color: #EF5350;
-        }
-        
-       .stats-row {
-    background: linear-gradient(135deg, rgba(0, 166, 147, 0.1) 0%, rgba(233, 30, 99, 0.1) 100%);
-    padding: 15px;  /* ← CAMBIADO: de 20px a 15px */
-    border-radius: 12px;  /* ← CAMBIADO: de 15px a 12px */
-    margin-bottom: 18px;  /* ← CAMBIADO: de 25px a 18px */
-    text-align: center;
-    border: 1px solid rgba(0, 166, 147, 0.2);
-}
+{% extends 'base.html' %}
 
-       .stat-number {
-    font-size: 2em;  /* ← CAMBIADO: de 2.5em a 2em */
-    font-weight: 700;
-    color: #00A693;
-    margin-bottom: 3px;  /* ← CAMBIADO: de 5px a 3px */
-}
-        
-        .stat-label {
-            color: #666;
-            font-size: 1em;
-            font-weight: 500;
-        }
-        
-        .invitado-item {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            margin: 10px 0;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            border-left: 4px solid #00A693;
-        }
-        
-        .invitado-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .foto-mini {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid #00A693;
-        }
-        
-        .foto-placeholder {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 20px;
-            color: white;
-        }
-        
-        .invitado-info {
-            flex-grow: 1;
-        }
-        
-        .invitado-nombre {
-            font-weight: 600;
-            margin-bottom: 3px;
-            color: #333;
-        }
-        
-        .invitado-puesto {
-            color: #666;
-            font-size: 0.9em;
-        }
-        
-        .qr-link {
-            background: linear-gradient(135deg, #E91E63, #F06292);
-            color: white;
-            padding: 8px 16px;
-            text-decoration: none;
-            border-radius: 20px;
-            font-size: 0.85em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .qr-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
-        }
-        
-        .file-preview {
-            margin-top: 15px;
-            text-align: center;
-        }
-        
-        .file-preview img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 12px;
-            border: 3px solid #00A693;
-            box-shadow: 0 4px 15px rgba(0, 166, 147, 0.2);
-        }
-        
-        .required {
-            color: #E91E63;
-        }
-        
-        .form-actions {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .form-section, .recent-section {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .recent-section {
-            animation-delay: 0.2s;
-        }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-            
-            .main-content {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .container {
-                padding: 0 20px;
-            }
-            
-            .form-section, .recent-section {
-                padding: 30px 25px;
-            }
-        }
+{% block title %}{{ titulo }}{% endblock %}
 
-        h3 {
-    margin: 15px 0 10px 0 !important;  /* ← CAMBIADO: de 25px 0 15px 0 */
-    color: #333;
-    font-size: 1.1em !important;  /* ← CAMBIADO: de 1.3em a 1.1em */
-}
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="geometric-logo"></div>
-                <div>
-                    <div class="header-title">{{ titulo }}</div>
-                    <div class="header-subtitle">Sistema de Control QR</div>
-                </div>
-            </div>
-            
-            <a href="{% url 'dashboard' %}" class="back-btn">← Volver al Dashboard</a>
-        </div>
-    </div>
+{% block page_title %}
+<div class="page-title">{{ titulo }}</div>
+{% endblock %}
+
+{% block navbar_actions %}
+<!-- Navegación específica de Crear Invitado -->
+<a href="{% url 'dashboard' %}" class="nav-item">
+    ← Dashboard
+</a>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Reset y contenedor principal - MÁS COMPACTO */
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 20px;
+        min-height: calc(100vh - 100px);
+    }
     
-    <div class="container">
-        <!-- Mostrar mensajes -->
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+    /* Grid principal optimizado */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 0.6fr;
+        gap: 18px;
+        align-items: start;
+        height: calc(100vh - 130px);
+    }
+    
+    /* Tarjeta del formulario ULTRA COMPACTA */
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 166, 147, 0.1);
+        position: relative;
+        overflow: hidden;
+        height: fit-content;
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+    }
+    
+    .form-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #00A693, #E91E63);
+    }
+    
+    .form-card h2 {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+    }
+    
+    /* Grupos de formulario ULTRA COMPACTOS */
+    .input-group {
+        margin-bottom: 12px;
+        position: relative;
+    }
+    
+    .input-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 4px;
+        transition: color 0.3s ease;
+    }
+    
+    .input-group input,
+    .input-group textarea,
+    .input-group select {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+        font-family: inherit;
+    }
+    
+    .input-group input:focus,
+    .input-group textarea:focus,
+    .input-group select:focus {
+        outline: none;
+        border-color: #00A693;
+        background: white;
+        box-shadow: 0 0 0 2px rgba(0, 166, 147, 0.1);
+    }
+    
+    /* File input ULTRA COMPACTO */
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        border: 1px dashed #00A693;
+        border-radius: 8px;
+        padding: 12px;
+        text-align: center;
+        background: rgba(0, 166, 147, 0.02);
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .file-input-wrapper:hover {
+        background: rgba(0, 166, 147, 0.05);
+        border-color: #E91E63;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-input-text {
+        color: #00A693;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .file-input-icon {
+        font-size: 1.3rem;
+        margin-bottom: 4px;
+        display: block;
+    }
+    
+    /* Preview de imagen MINI */
+    .image-preview {
+        margin-top: 8px;
+        text-align: center;
+    }
+    
+    .image-preview img {
+        max-width: 120px;
+        max-height: 120px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #00A693;
+    }
+    
+    /* Botón principal COMPACTO */
+    .submit-btn {
+        width: 100%;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        box-shadow: 0 2px 8px rgba(0, 166, 147, 0.2);
+        margin-top: 8px;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 166, 147, 0.4);
+        filter: brightness(1.1);
+    }
+    
+    .submit-btn:active {
+        transform: translateY(-1px);
+    }
+    
+    /* Panel lateral ULTRA COMPACTO */
+    .sidebar-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        height: calc(100vh - 140px);
+        overflow-y: auto;
+    }
+    
+    /* Tarjeta de estadísticas MINI */
+    .stats-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-left: 3px solid #E91E63;
+        text-align: center;
+    }
+    
+    .stats-card h3 {
+        font-size: 0.95rem;
+        color: #333;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+    
+    .stat-display {
+        background: linear-gradient(135deg, rgba(0, 166, 147, 0.1), rgba(233, 30, 99, 0.1));
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 0;
+    }
+    
+    .stat-number {
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #00A693;
+        margin-bottom: 2px;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+        color: #666;
+        font-weight: 500;
+    }
+    
+    /* Lista de invitados MINI - ALTURA REDUCIDA */
+    .recent-card {
+        background: white;
+        border-radius: 12px;
+        padding: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-left: 3px solid #2196F3;
+        flex: 1;
+        overflow-y: auto;
+        max-height: 280px; /* ALTURA MÁXIMA FIJA */
+    }
+    
+    .recent-card h3 {
+        font-size: 0.9rem;
+        color: #333;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .guest-item {
+        display: flex;
+        align-items: center;
+        padding: 6px;
+        margin-bottom: 4px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        transition: all 0.3s ease;
+        border-left: 2px solid transparent;
+    }
+    
+    .guest-item:hover {
+        background: #e9ecef;
+        border-left-color: #00A693;
+        transform: translateX(2px);
+    }
+    
+    .guest-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        margin-right: 6px;
+        border: 1px solid #00A693;
+        object-fit: cover;
+    }
+    
+    .guest-avatar-placeholder {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 6px;
+        font-size: 0.8rem;
+        color: white;
+    }
+    
+    .guest-info {
+        flex: 1;
+    }
+    
+    .guest-name {
+        font-weight: 600;
+        color: #333;
+        font-size: 0.75rem;
+        margin-bottom: 1px;
+        line-height: 1.1;
+    }
+    
+    .guest-role {
+        color: #666;
+        font-size: 0.65rem;
+        line-height: 1.1;
+    }
+    
+    .qr-button {
+        background: linear-gradient(135deg, #E91E63, #F06292);
+        color: white;
+        padding: 3px 6px;
+        text-decoration: none;
+        border-radius: 8px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+    
+    .qr-button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(233, 30, 99, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Estados de error COMPACTOS */
+    .error-text {
+        color: #dc3545;
+        font-size: 0.7rem;
+        margin-top: 2px;
+        font-weight: 500;
+    }
+    
+    /* Placeholder para lista vacía ULTRA COMPACTO */
+    .empty-state {
+        text-align: center;
+        padding: 15px 8px;
+        color: #999;
+        font-style: italic;
+        font-size: 0.8rem;
+    }
+    
+    .empty-state-icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+        opacity: 0.5;
+    }
+    
+    /* Animaciones */
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .form-card,
+    .stats-card,
+    .recent-card {
+        animation: slideInUp 0.6s ease forwards;
+    }
+    
+    .stats-card {
+        animation-delay: 0.1s;
+    }
+    
+    .recent-card {
+        animation-delay: 0.2s;
+    }
+    
+    /* Responsive Design ULTRA COMPACTO */
+    @media (max-width: 1200px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+            gap: 15px;
+            height: auto;
+        }
         
-        <div class="main-content">
-            <!-- Formulario -->
-            <div class="form-section">
-                <h2 class="section-title">📝 Nuevo Invitado</h2>
+        .page-container {
+            padding: 8px 15px;
+        }
+        
+        .sidebar-panel {
+            flex-direction: row;
+            height: auto;
+            overflow: visible;
+        }
+        
+        .stats-card,
+        .recent-card {
+            flex: 1;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .form-card,
+        .stats-card,
+        .recent-card {
+            padding: 12px 10px;
+        }
+        
+        .page-container {
+            padding: 5px 10px;
+        }
+        
+        .stat-number {
+            font-size: 1.4rem;
+        }
+        
+        .sidebar-panel {
+            flex-direction: column;
+        }
+        
+        .guest-item {
+            flex-direction: column;
+            text-align: center;
+            gap: 6px;
+        }
+        
+        .guest-avatar,
+        .guest-avatar-placeholder {
+            margin-right: 0;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .form-card h2 {
+            font-size: 1rem;
+        }
+        
+        .input-group {
+            margin-bottom: 8px;
+        }
+        
+        .content-grid {
+            gap: 10px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Grid principal -->
+    <div class="content-grid">
+        <!-- Formulario principal -->
+        <div class="form-card">
+            <h2>📋 Datos del Invitado</h2>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
                 
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    
-                    <div class="form-group">
-                        <label for="{{ form.nombre_completo.id_for_label }}">
-                            {{ form.nombre_completo.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.nombre_completo }}
-                        {% if form.nombre_completo.errors %}
-                            <div class="help-text" style="color: #C62828;">
-                                {{ form.nombre_completo.errors.0 }}
-                            </div>
-                        {% endif %}
+                <div class="input-group">
+                    <label for="{{ form.nombre_completo.id_for_label }}">
+                        Nombre Completo <span style="color: #E91E63;">*</span>
+                    </label>
+                    {{ form.nombre_completo }}
+                    {% if form.nombre_completo.errors %}
+                        <div class="error-text">{{ form.nombre_completo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="input-group">
+                    <label for="{{ form.puesto_cargo.id_for_label }}">
+                        Puesto o Cargo <span style="color: #E91E63;">*</span>
+                    </label>
+                    {{ form.puesto_cargo }}
+                    {% if form.puesto_cargo.errors %}
+                        <div class="error-text">{{ form.puesto_cargo.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="input-group">
+                    <label for="{{ form.fotografia.id_for_label }}">
+                        Fotografía <span style="color: #E91E63;">*</span>
+                    </label>
+                    <div class="file-input-wrapper" onclick="document.getElementById('{{ form.fotografia.id_for_label }}').click()">
+                        <span class="file-input-icon">📷</span>
+                        <div class="file-input-text">Seleccionar imagen</div>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            JPG, PNG, GIF | Max: 2MB
+                        </small>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="{{ form.puesto_cargo.id_for_label }}">
-                            {{ form.puesto_cargo.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.puesto_cargo }}
-                        {% if form.puesto_cargo.errors %}
-                            <div class="help-text" style="color: #C62828;">
-                                {{ form.puesto_cargo.errors.0 }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="{{ form.fotografia.id_for_label }}">
-                            {{ form.fotografia.label }} <span class="required">*</span>
-                        </label>
-                        {{ form.fotografia }}
-                        <div class="help-text">{{ form.fotografia.help_text }}</div>
-                        {% if form.fotografia.errors %}
-                            <div class="help-text" style="color: #C62828;">
-                                {{ form.fotografia.errors.0 }}
-                            </div>
-                        {% endif %}
-                        <div class="file-preview" id="photo-preview"></div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button type="submit" class="btn btn-primary">
-                            ✅ Crear Invitado y Generar QR
-                        </button>
-                    </div>
-                </form>
+                    {{ form.fotografia }}
+                    {% if form.fotografia.errors %}
+                        <div class="error-text">{{ form.fotografia.errors.0 }}</div>
+                    {% endif %}
+                    <div class="image-preview" id="image-preview"></div>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    ✅ Crear Invitado y Generar QR
+                </button>
+            </form>
+        </div>
+        
+        <!-- Panel lateral -->
+        <div class="sidebar-panel">
+            <!-- Estadísticas -->
+            <div class="stats-card">
+                <h3>📊 Estadísticas</h3>
+                <div class="stat-display">
+                    <div class="stat-number">{{ total_invitados }}</div>
+                    <div class="stat-label">Invitados Registrados</div>
+                </div>
             </div>
             
             <!-- Invitados recientes -->
-            <div class="recent-section">
-                <h2 class="section-title">📊 Estadísticas</h2>
-                
-                <div class="stats-row">
-                    <div class="stat-number">{{ total_invitados }}</div>
-                    <div class="stat-label">Total de Invitados Registrados</div>
-                </div>
-                
-
-                
-                <h3 style="margin: 25px 0 15px 0; color: #333; font-size: 1.3em;">👥 Últimos Registrados</h3>
+            <div class="recent-card">
+                <h3>👥 Últimos Registrados</h3>
                 
                 {% if invitados_recientes %}
                     {% for invitado in invitados_recientes %}
-                        <div class="invitado-item">
+                        <div class="guest-item">
                             {% if invitado.fotografia %}
-                                <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto-mini">
+                                <img src="{{ invitado.fotografia.url }}" alt="Foto" class="guest-avatar">
                             {% else %}
-                                <div class="foto-placeholder">👤</div>
+                                <div class="guest-avatar-placeholder">👤</div>
                             {% endif %}
                             
-                            <div class="invitado-info">
-                                <div class="invitado-nombre">{{ invitado.nombre_completo }}</div>
-                                <div class="invitado-puesto">{{ invitado.puesto_cargo }}</div>
+                            <div class="guest-info">
+                                <div class="guest-name">{{ invitado.nombre_completo }}</div>
+                                <div class="guest-role">{{ invitado.puesto_cargo }}</div>
                             </div>
                             
-                            <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="qr-link">Ver QR</a>
+                            <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="qr-button">Ver QR</a>
                         </div>
                     {% endfor %}
                 {% else %}
-                    <div style="text-align: center; color: #666; font-style: italic; padding: 40px;">
-                        📭 No hay invitados registrados aún
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <div>No hay invitados registrados aún</div>
                     </div>
                 {% endif %}
             </div>
         </div>
     </div>
-    
-    <script>
-        // Preview de la foto seleccionada
-        document.getElementById('{{ form.fotografia.id_for_label }}').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            const preview = document.getElementById('photo-preview');
-            
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
-                };
-                reader.readAsDataURL(file);
-            } else {
-                preview.innerHTML = '';
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preview de imagen mejorado
+    document.getElementById('{{ form.fotografia.id_for_label }}').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview');
+        const wrapper = document.querySelector('.file-input-wrapper');
+        
+        if (file) {
+            // Validar tipo de archivo
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor selecciona una imagen válida');
+                return;
             }
+            
+            // Validar tamaño (2MB)
+            if (file.size > 2 * 1024 * 1024) {
+                alert('La imagen no debe superar los 2MB');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                wrapper.style.borderColor = '#00A693';
+                wrapper.querySelector('.file-input-text').textContent = `Imagen seleccionada: ${file.name}`;
+            };
+            reader.readAsDataURL(file);
+        } else {
+            preview.innerHTML = '';
+            wrapper.style.borderColor = '#00A693';
+            wrapper.querySelector('.file-input-text').textContent = 'Seleccionar imagen';
+        }
+    });
+    
+    // Mejorar UX del formulario
+    document.querySelectorAll('.input-group input, .input-group textarea, .input-group select').forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
         });
         
-        // Auto-hide messages después de 5 segundos
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-20px)';
-                setTimeout(function() {
-                    if (alert.parentNode) {
-                        alert.remove();
-                    }
-                }, 500);
-            });
-        }, 5000);
-    </script>
-</body>
-</html>
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+    
+    // Loading state para el botón
+    document.querySelector('form').addEventListener('submit', function() {
+        const btn = document.querySelector('.submit-btn');
+        btn.innerHTML = '⏳ Creando invitado...';
+        btn.disabled = true;
+    });
+</script>
+{% endblock %}
