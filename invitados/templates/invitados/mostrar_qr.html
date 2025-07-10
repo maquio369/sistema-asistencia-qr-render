@@ -1,475 +1,855 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block page_title %}
+<div class="page-title">Código QR - {{ invitado.nombre_completo }}</div>
+{% endblock %}
+
+{% block navbar_actions %}
+<!-- Navegación específica de Mostrar QR -->
+<button onclick="window.print()" class="nav-item primary">
+    🖨️ Imprimir QR
+</button>
+<a href="{% url 'lista_invitados' %}" class="nav-item">
+    ← Lista Invitados
+</a>
+<div class="user-section">
+ 
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor principal */
+    .qr-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 10px;
+        height: calc(100vh - 160px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 320px;
+    }
+    
+    /* Tarjeta principal horizontal */
+    .qr-main-container {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 
+            0 8px 20px rgba(0, 0, 0, 0.05),
+            0 3px 10px rgba(0, 0, 0, 0.02);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        max-width: 750px;
+        min-height: 280px;
+        border: 1px solid rgba(0, 166, 147, 0.1);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Gradient background sutil */
+    .qr-main-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 20%, rgba(0, 166, 147, 0.03) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(233, 30, 99, 0.03) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    /* Badge del gobierno */
+    .government-badge {
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        color: white;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        position: relative;
+        z-index: 1;
+        box-shadow: 0 2px 4px rgba(0, 166, 147, 0.3);
+        align-self: center;
+    }
+    
+    /* Contenedor horizontal principal */
+    .horizontal-content {
+        display: flex;
+        gap: 20px;
+        align-items: center;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Sección izquierda - Info del invitado */
+    .left-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-width: 220px;
+    }
+    
+    /* Contenedor de foto */
+    .photo-container {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 12px;
+        z-index: 1;
+    }
+    
+    .photo-container::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        right: -8px;
+        bottom: -8px;
+        background: linear-gradient(45deg, #00A693, #E91E63, #2196F3, #00A693);
+        border-radius: 50%;
+        animation: rotate 3s linear infinite;
+        z-index: -1;
+    }
+    
+    @keyframes rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Foto del invitado */
+    .invitado-foto {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid white;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        display: block;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .foto-placeholder {
+        width: 75px;
+        height: 75px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: white;
+        border: 2px solid white;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Información del invitado */
+    .invitado-info {
+        margin-bottom: 12px;
+        width: 100%;
+    }
+    
+    .invitado-nombre {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #333, #666);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .invitado-puesto {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 4px;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+    
+    .invitado-subtitle {
+        font-size: 0.7rem;
+        color: #999;
+        font-style: italic;
+        margin-top: 2px;
+    }
+    
+    /* Token info en la sección izquierda */
+    .token-info {
+        background: linear-gradient(135deg, rgba(0, 166, 147, 0.08), rgba(0, 166, 147, 0.12));
+        padding: 10px;
+        border-radius: 8px;
+        margin-top: 12px;
+        border-left: 3px solid #00A693;
+        box-shadow: 0 2px 4px rgba(0, 166, 147, 0.1);
+        width: 100%;
+    }
+    
+    .token-label {
+        font-size: 0.65rem;
+        color: #555;
+        margin-bottom: 4px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .token-value {
+        font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+        font-size: 0.6rem;
+        color: #333;
+        word-break: break-all;
+        background: white;
+        padding: 6px 8px;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 166, 147, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .token-value:hover {
+        background: rgba(0, 166, 147, 0.05);
+        border-color: #00A693;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0, 166, 147, 0.2);
+    }
+    
+    .token-value::before {
+        content: '📋 Click para copiar';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 166, 147, 0.95);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        border-radius: 6px;
+    }
+    
+    .token-value:hover::before {
+        opacity: 1;
+    }
+    
+    /* Sección derecha - QR */
+    .right-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        min-width: 240px;
+    }
+    
+    /* Sección QR */
+    .qr-section {
+        background: 
+            linear-gradient(135deg, rgba(0, 166, 147, 0.05), rgba(233, 30, 99, 0.05)),
+            white;
+        border-radius: 10px;
+        padding: 16px;
+        border: 2px solid rgba(0, 166, 147, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        width: 100%;
+        max-width: 280px;
+    }
+    
+    .qr-title {
+        font-size: 0.95rem;
+        color: #333;
+        margin-bottom: 12px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+    
+    /* Contenedor QR */
+    .qr-container-inner {
+        position: relative;
+        display: inline-block;
+        margin: 12px auto;
+    }
+    
+    .qr-container-inner::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        right: -6px;
+        bottom: -6px;
+        background: linear-gradient(45deg, rgba(0, 166, 147, 0.2), rgba(233, 30, 99, 0.2));
+        border-radius: 10px;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 0.3; transform: scale(1); }
+        50% { opacity: 0.6; transform: scale(1.02); }
+    }
+    
+    /* Código QR */
+    .qr-code {
+        max-width: 150px;
+        height: auto;
+        border-radius: 8px;
+        border: 2px solid white;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+        background: white;
+        padding: 6px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .qr-code:hover {
+        transform: scale(1.05) rotate(1deg);
+        box-shadow: 0 5px 16px rgba(0, 166, 147, 0.25);
+    }
+    
+    .qr-placeholder {
+        width: 150px;
+        height: 150px;
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: 2px solid #dc3545;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin: 12px auto;
+        color: #dc3545;
+        position: relative;
+        z-index: 2;
+    }
+    
+    /* Status badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.65rem;
+        margin-top: 8px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .status-ready {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .status-ready:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+    
+    .status-error {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .status-error:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+    
+    /* Instrucciones */
+    .print-instructions {
+        background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(0, 166, 147, 0.05));
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 12px;
+        border: 1px solid rgba(233, 30, 99, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+        text-align: center;
+    }
+    
+    .print-instructions h4 {
+        color: #333;
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+    
+    .print-instructions p {
+        color: #666;
+        font-size: 0.7rem;
+        line-height: 1.4;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    /* Separador vertical */
+    .vertical-separator {
+        width: 2px;
+        background: linear-gradient(to bottom, transparent, rgba(0, 166, 147, 0.3), transparent);
+        height: 160px;
+        margin: 0 12px;
+        position: relative;
+    }
+    
+    .vertical-separator::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 6px;
+        height: 6px;
+        background: #00A693;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(0, 166, 147, 0.2);
+    }
+    
+    /* Animaciones */
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: translateY(40px) scale(0.9);
         }
-        
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+    
+    .qr-main-container {
+        animation: fadeInScale 0.8s ease forwards;
+    }
+    
+    .left-section {
+        animation: fadeInScale 0.8s ease 0.2s both;
+    }
+    
+    .right-section {
+        animation: fadeInScale 0.8s ease 0.4s both;
+    }
+    
+    /* Estilos para impresión */
+    @media print {
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-            color: #333;
+            background: white !important;
+            font-size: 12pt;
         }
         
-        .header {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            padding: 12px 0;
-            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
-            margin-bottom: 25px;
+        .unified-navbar,
+        .no-print,
+        .print-instructions {
+            display: none !important;
         }
         
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .geometric-logo {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-        
-        .geometric-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: rotate(45deg);
-        }
-        
-        .geometric-logo::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 25px;
-            height: 25px;
-            background: #E91E63;
-            transform: rotate(45deg);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 2.2em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .print-btn {
-            background: rgba(233, 30, 99, 0.2);
-            color: white;
-            border: 2px solid rgba(233, 30, 99, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .print-btn:hover {
-            background: rgba(233, 30, 99, 0.3);
-            border-color: rgba(233, 30, 99, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 0 30px;
+        .qr-container {
+            height: auto;
+            padding: 20px;
+            max-width: none;
         }
         
         .qr-main-container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            border-top: 4px solid #00A693;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .qr-main-container::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent 40%, rgba(0, 166, 147, 0.03) 50%, transparent 60%);
-            animation: shimmer 3s infinite;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-        }
-        
-        .government-badge {
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            color: white;
-            padding: 8px 20px;
-            border-radius: 25px;
-            font-size: 0.9em;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .invitado-foto {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 15px auto 20px;
-            border: 4px solid #00A693;
-            box-shadow: 0 8px 25px rgba(0, 166, 147, 0.2);
-            display: block;
-        }
-        
-        .foto-placeholder {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 15px auto 20px;
-            font-size: 3em;
-            color: white;
-            box-shadow: 0 8px 25px rgba(0, 166, 147, 0.2);
-        }
-        
-        .invitado-nombre {
-            font-size: 2.2em;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .invitado-puesto {
-            font-size: 1.3em;
-            color: #666;
-            margin-bottom: 25px;
-            font-weight: 500;
-        }
-        
-        .qr-section {
-            background: linear-gradient(135deg, rgba(0, 166, 147, 0.05), rgba(233, 30, 99, 0.05));
-            border-radius: 20px;
+            box-shadow: none;
+            border: 3px solid #333;
+            page-break-inside: avoid;
+            max-width: none;
+            margin: 0;
             padding: 30px;
-            margin: 30px 0;
-            border: 2px solid rgba(0, 166, 147, 0.1);
+            min-height: auto;
         }
         
-        .qr-title {
-            font-size: 1.4em;
-            color: #333;
-            margin-bottom: 20px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+        .horizontal-content {
+            gap: 30px;
+        }
+        
+        .qr-main-container::before,
+        .photo-container::before,
+        .qr-container-inner::before {
+            display: none;
         }
         
         .qr-code {
-            max-width: 280px;
-            height: auto;
-            margin: 20px auto;
-            border-radius: 15px;
-            border: 3px solid #00A693;
-            box-shadow: 0 8px 25px rgba(0, 166, 147, 0.2);
-            background: white;
-            padding: 10px;
+            max-width: 200px;
         }
         
-        .qr-placeholder {
-            width: 280px;
-            height: 280px;
-            background: #f8f9fa;
-            border: 3px solid #dc3545;
-            border-radius: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 20px auto;
-            color: #dc3545;
+        .invitado-nombre {
+            font-size: 18pt;
+            -webkit-text-fill-color: #333;
         }
         
-        .token-info {
-            background: rgba(0, 166, 147, 0.1);
-            padding: 15px 20px;
-            border-radius: 15px;
-            margin-top: 20px;
-            border-left: 4px solid #00A693;
+        .invitado-puesto {
+            font-size: 14pt;
         }
         
-        .token-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .government-badge {
+            font-size: 12pt;
         }
         
         .token-value {
-            font-family: 'Courier New', monospace;
-            font-size: 0.85em;
-            color: #333;
-            word-break: break-all;
-            background: white;
-            padding: 8px 12px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 166, 147, 0.2);
+            font-size: 9pt;
         }
         
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-weight: 600;
-            font-size: 0.9em;
-            margin-top: 15px;
+        .vertical-separator {
+            display: none;
         }
-        
-        .status-ready {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-            border: 2px solid rgba(40, 167, 69, 0.2);
-        }
-        
-        .status-error {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
-            border: 2px solid rgba(220, 53, 69, 0.2);
-        }
-        
-        .print-instructions {
-            background: linear-gradient(135deg, rgba(233, 30, 99, 0.05), rgba(0, 166, 147, 0.05));
-            padding: 20px;
-            border-radius: 15px;
-            margin-top: 25px;
-            border: 1px solid rgba(233, 30, 99, 0.2);
-        }
-        
-        .print-instructions h4 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 1.1em;
-        }
-        
-        .print-instructions p {
-            color: #666;
-            font-size: 0.9em;
-            line-height: 1.5;
-        }
-        
-        /* Estilos para impresión */
-        @media print {
-            body {
-                background: white !important;
-                font-size: 12pt;
-            }
-            
-            .header,
-            .no-print,
-            .print-instructions {
-                display: none !important;
-            }
-            
-            .container {
-                max-width: none;
-                margin: 0;
-                padding: 20px;
-            }
-            
-            .qr-main-container {
-                box-shadow: none;
-                border: 2px solid #333;
-                page-break-inside: avoid;
-            }
-            
-            .qr-main-container::before {
-                display: none;
-            }
-            
-            .qr-code {
-                max-width: 200px;
-            }
-            
-            .invitado-nombre {
-                font-size: 18pt;
-            }
-            
-            .invitado-puesto {
-                font-size: 14pt;
-            }
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1024px) {
+        .qr-container {
+            padding: 15px;
         }
         
         .qr-main-container {
-            animation: fadeInUp 0.8s ease forwards;
+            padding: 25px;
+            max-width: 900px;
         }
         
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .header-actions {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-            
-            .qr-main-container {
-                padding: 25px 20px;
-            }
-            
-            .invitado-nombre {
-                font-size: 1.8em;
-            }
-            
-            .qr-code {
-                max-width: 250px;
-            }
+        .horizontal-content {
+            gap: 30px;
         }
-    </style>
-</head>
-<body>
-    <div class="header no-print">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="geometric-logo"></div>
-                <div>
-                    <div class="header-title">Código QR</div>
-                    <div class="header-subtitle">Sistema de Control de Asistencia</div>
-                </div>
-            </div>
-            
-            <div class="header-actions">
-                <button onclick="window.print()" class="print-btn">🖨️ Imprimir QR</button>
-                <a href="{% url 'lista_invitados' %}" class="back-btn">← Volver a la Lista</a>
-            </div>
-        </div>
-    </div>
+        
+        .left-section,
+        .right-section {
+            min-width: 250px;
+        }
+        
+        .qr-code {
+            max-width: 220px;
+        }
+    }
     
-    <div class="container">
-        <div class="qr-main-container">
-            <div class="government-badge">
-                🏛️ Gobierno de Chiapas - Evento Oficial
-            </div>
-            
-            {% if invitado.fotografia %}
-                <img src="{{ invitado.fotografia.url }}" alt="Foto del invitado" class="invitado-foto">
-            {% else %}
-                <div class="foto-placeholder">👤</div>
-            {% endif %}
-            
-            <h1 class="invitado-nombre">{{ invitado.nombre_completo }}</h1>
-            <p class="invitado-puesto">{{ invitado.puesto_cargo }}</p>
-            
-            <div class="qr-section">
-                <h3 class="qr-title">📱 Código QR de Acceso</h3>
+    @media (max-width: 768px) {
+        .qr-container {
+            padding: 10px;
+            height: auto;
+            min-height: auto;
+        }
+        
+        .qr-main-container {
+            padding: 20px;
+            min-height: auto;
+        }
+        
+        .horizontal-content {
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .left-section,
+        .right-section {
+            min-width: auto;
+            width: 100%;
+        }
+        
+        .vertical-separator {
+            display: none;
+        }
+        
+        .invitado-nombre {
+            font-size: 1.8rem;
+        }
+        
+        .invitado-puesto {
+            font-size: 1.1rem;
+        }
+        
+        .qr-code {
+            max-width: 200px;
+        }
+        
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .qr-main-container {
+            padding: 15px;
+        }
+        
+        .invitado-foto,
+        .foto-placeholder {
+            width: 100px;
+            height: 100px;
+        }
+        
+        .foto-placeholder {
+            font-size: 2.5rem;
+        }
+        
+        .invitado-nombre {
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .invitado-puesto {
+            font-size: 1rem;
+        }
+        
+        .qr-code {
+            max-width: 180px;
+        }
+        
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+        }
+        
+        .government-badge {
+            font-size: 0.8rem;
+            padding: 6px 15px;
+        }
+        
+        .qr-title {
+            font-size: 1.2rem;
+        }
+        
+        .token-value {
+            font-size: 0.75rem;
+            padding: 8px 10px;
+        }
+        
+        .qr-section {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="qr-container">
+    <div class="qr-main-container">
+        <div class="government-badge">
+            🏛️ Gobierno de Chiapas - Evento Oficial
+        </div>
+        
+        <div class="horizontal-content">
+            <!-- Sección Izquierda - Información del Invitado -->
+            <div class="left-section">
+                <div class="photo-container">
+                    {% if invitado.fotografia %}
+                        <img src="{{ invitado.fotografia.url }}" alt="Foto del invitado" class="invitado-foto">
+                    {% else %}
+                        <div class="foto-placeholder">👤</div>
+                    {% endif %}
+                </div>
                 
-                {% if invitado.qr_imagen %}
-                    <img src="{{ invitado.qr_imagen.url }}" alt="Código QR" class="qr-code">
-                    <div class="status-badge status-ready">
-                        ✅ QR Listo para Escanear
-                    </div>
-                {% else %}
-                    <div class="qr-placeholder">
-                        <div style="font-size: 3em; margin-bottom: 10px;">❌</div>
-                        <div style="font-weight: 600;">QR No Generado</div>
-                        <div style="font-size: 0.9em; margin-top: 5px;">Contacte al administrador</div>
-                    </div>
-                    <div class="status-badge status-error">
-                        ⚠️ QR No Disponible
-                    </div>
-                {% endif %}
+                <div class="invitado-info">
+                    <h1 class="invitado-nombre">{{ invitado.nombre_completo }}</h1>
+                    <p class="invitado-puesto">{{ invitado.puesto_cargo }}</p>
+                    <p class="invitado-subtitle">Invitado Oficial al Evento</p>
+                </div>
                 
                 <div class="token-info">
-                    <div class="token-label">🔑 Token de Identificación:</div>
-                    <div class="token-value">{{ invitado.token_qr }}</div>
+                    <div class="token-label">🔑 Token de Identificación</div>
+                    <div class="token-value" title="Haz clic para copiar">{{ invitado.token_qr }}</div>
+                </div>
+            </div>
+            
+            <!-- Separador Visual -->
+            <div class="vertical-separator"></div>
+            
+            <!-- Sección Derecha - Código QR -->
+            <div class="right-section">
+                <div class="qr-section">
+                    <h3 class="qr-title">📱 Código QR de Acceso</h3>
+                    
+                    {% if invitado.qr_imagen %}
+                        <div class="qr-container-inner">
+                            <img src="{{ invitado.qr_imagen.url }}" alt="Código QR" class="qr-code">
+                        </div>
+                        <div class="status-badge status-ready">
+                            ✅ QR Listo para Escanear
+                        </div>
+                    {% else %}
+                        <div class="qr-placeholder">
+                            <div style="font-size: 4rem; margin-bottom: 15px;">❌</div>
+                            <div style="font-weight: 700; font-size: 1.2rem;">QR No Generado</div>
+                            <div style="font-size: 1rem; margin-top: 10px; opacity: 0.8;">Contacte al administrador</div>
+                        </div>
+                        <div class="status-badge status-error">
+                            ⚠️ QR No Disponible
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
+        
+        <div class="print-instructions no-print">
+            <h4>📋 Instrucciones de Uso</h4>
+            <p>Presente este código QR en el punto de acceso al evento. El código será escaneado automáticamente para registrar su asistencia y verificar su identidad.</p>
+        </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Preparar para impresión
+    window.addEventListener('beforeprint', function() {
+        document.querySelector('.print-instructions').style.display = 'none';
+    });
+    
+    window.addEventListener('afterprint', function() {
+        document.querySelector('.print-instructions').style.display = 'block';
+    });
+    
+    // Funcionalidad mejorada de copia del token
+    document.addEventListener('DOMContentLoaded', function() {
+        const tokenValue = document.querySelector('.token-value');
+        if (tokenValue) {
+            tokenValue.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent).then(() => {
+                    // Crear notificación moderna
+                    const notification = document.createElement('div');
+                    notification.innerHTML = `
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <span style="font-size: 1.2rem;">✅</span>
+                            <span>Token copiado al portapapeles</span>
+                        </div>
+                    `;
+                    notification.style.cssText = `
+                        position: fixed;
+                        top: 30px;
+                        right: 30px;
+                        background: linear-gradient(135deg, #28a745, #20c997);
+                        color: white;
+                        padding: 15px 25px;
+                        border-radius: 15px;
+                        font-size: 0.95rem;
+                        font-weight: 600;
+                        z-index: 10000;
+                        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+                        transform: translateX(400px);
+                        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    `;
+                    
+                    document.body.appendChild(notification);
+                    
+                    // Animar entrada
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(0)';
+                    }, 10);
+                    
+                    // Animar salida
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(400px)';
+                        setTimeout(() => {
+                            if (document.body.contains(notification)) {
+                                document.body.removeChild(notification);
+                            }
+                        }, 400);
+                    }, 3000);
+                    
+                    // Efecto en el token
+                    this.style.background = 'linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(32, 191, 151, 0.2))';
+                    this.style.borderColor = '#28a745';
+                    this.style.transform = 'translateY(-2px) scale(1.02)';
+                    
+                    setTimeout(() => {
+                        this.style.background = 'white';
+                        this.style.borderColor = 'rgba(0, 166, 147, 0.2)';
+                        this.style.transform = 'translateY(0) scale(1)';
+                    }, 1000);
+                    
+                }).catch(() => {
+                    // Fallback para navegadores antiguos
+                    this.select();
+                    document.execCommand('copy');
+                    
+                    // Notificación simple
+                    alert('Token copiado al portapapeles');
+                });
+            });
+        }
+        
+        // Efecto mejorado en QR
+        const qrCode = document.querySelector('.qr-code');
+        if (qrCode) {
+            qrCode.addEventListener('click', function() {
+                this.style.filter = 'brightness(1.1) saturate(1.2)';
+                this.style.transform = 'scale(1.08) rotate(2deg)';
+                
+                setTimeout(() => {
+                    this.style.filter = 'brightness(1) saturate(1)';
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                }, 300);
+            });
+        }
+        
+        // Pausar animaciones después de un tiempo
+        setTimeout(() => {
+            const photoContainer = document.querySelector('.photo-container::before');
+            const qrContainer = document.querySelector('.qr-container-inner::before');
+            
+            if (photoContainer) {
+                document.head.insertAdjacentHTML('beforeend', `
+                    <style>
+                        .photo-container::before { animation-play-state: paused; }
+                    </style>
+                `);
+            }
+        }, 10000);
+    });
+    
+    // Atajos de teclado mejorados
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'p' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            window.print();
+        }
+        
+        if (e.key === 'c' && (e.ctrlKey || e.metaKey) && e.shiftKey) {
+            e.preventDefault();
+            document.querySelector('.token-value').click();
+        }
+    });
+</script>
+{% endblock %}
