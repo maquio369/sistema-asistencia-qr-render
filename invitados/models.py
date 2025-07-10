@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw
 from django.conf import settings
+import pytz
 
 class Invitado(models.Model):
     # Campos principales
@@ -199,14 +200,18 @@ class Invitado(models.Model):
         return True
 
     def marcar_asistencia(self, dispositivo=""):
-        """Método para marcar asistencia del invitado"""
-        if not self.asistio:
-            self.asistio = True
-            self.fecha_hora_entrada = timezone.now()
-            self.escaneado_por = dispositivo
-            self.save()
-            return True
-        return False
+    
+      if not self.asistio:
+        # Obtener hora actual en zona horaria de México
+        mexico_tz = pytz.timezone('America/Mexico_City')
+        hora_mexico = timezone.now().astimezone(mexico_tz)
+        
+        self.asistio = True
+        self.fecha_hora_entrada = hora_mexico  # ✅ Ahora guarda hora local
+        self.escaneado_por = dispositivo
+        self.save()
+        return True
+      return False
     
     @property
     def estado_asistencia(self):
@@ -217,7 +222,21 @@ class Invitado(models.Model):
     
     @property
     def hora_entrada_formateada(self):
-        """Retorna la hora de entrada formateada"""
-        if self.fecha_hora_entrada:
+   
+     if self.fecha_hora_entrada:
+        try:
+            mexico_tz = pytz.timezone('America/Mexico_City')
+            
+            if self.fecha_hora_entrada.tzinfo is None:
+                # Sin timezone info, asumir UTC
+                utc_time = pytz.UTC.localize(self.fecha_hora_entrada)
+                hora_local = utc_time.astimezone(mexico_tz)
+            else:
+                # Ya tiene timezone info, convertir directamente
+                hora_local = self.fecha_hora_entrada.astimezone(mexico_tz)
+            
+            return hora_local.strftime("%d/%m/%Y %H:%M:%S")
+        except Exception as e:
+            print(f"Error al formatear hora: {e}")
             return self.fecha_hora_entrada.strftime("%d/%m/%Y %H:%M:%S")
-        return "No registrada"
+     return "No registrada"

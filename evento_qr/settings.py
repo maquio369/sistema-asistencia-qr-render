@@ -127,13 +127,11 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
 
+USE_TZ = True  # ✅ Mantener activado
 USE_I18N = True
 
-USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -222,5 +220,9 @@ if os.getenv('DB_HOST'):  # Solo en Docker
     # Agregar WhiteNoise para servir archivos estáticos en Docker
     if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
         MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+
+       
     
     print("🐳 Configuración Docker aplicada - Puerto 3012 habilitado")
+
+    os.environ['TZ'] = 'America/Mexico_City'

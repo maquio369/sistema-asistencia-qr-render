@@ -18,6 +18,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import CustomLoginForm
 from .forms import InvitadoForm
 from django.contrib import messages
+import pytz
 
 
 def login_view(request):
@@ -193,8 +194,23 @@ def estadisticas_tiempo_real(request):
     ).order_by('-fecha_hora_entrada')[:5]
     
     llegadas_data = []
+    mexico_tz = pytz.timezone('America/Mexico_City')
     for invitado in ultimas_llegadas:
-        llegadas_data.append({
+        try:
+            if invitado.fecha_hora_entrada:
+                if invitado.fecha_hora_entrada.tzinfo is None:
+                    utc_time = pytz.UTC.localize(invitado.fecha_hora_entrada)
+                    hora_local = utc_time.astimezone(mexico_tz)
+                else:
+                    hora_local = invitado.fecha_hora_entrada.astimezone(mexico_tz)
+                hora_formateada = hora_local.strftime('%d/%m/%Y %H:%M:%S')
+            else:
+                hora_formateada = "No registrada"
+        except Exception as e:
+            print(f"Error al formatear hora: {e}")
+            hora_formateada = invitado.hora_entrada_formateada
+                
+            llegadas_data.append({
             'nombre': invitado.nombre_completo,
             'puesto': invitado.puesto_cargo,
             'hora': invitado.hora_entrada_formateada,

@@ -11,7 +11,6 @@
 <a href="{% url 'dashboard' %}" class="nav-item">
     ← Dashboard
 </a>
-
 {% endblock %}
 
 {% block extra_css %}
@@ -33,7 +32,7 @@
         height: 100%;
     }
     
-    /* Columna izquierda - Cámara y resultado */
+    /* Columna izquierda - Solo cámara */
     .scanner-column {
         display: flex;
         flex-direction: column;
@@ -50,7 +49,7 @@
         border: 1px solid rgba(0, 166, 147, 0.1);
         position: relative;
         overflow: hidden;
-        flex: 1.2;
+        flex: 1;
     }
     
     .camera-card::before {
@@ -61,28 +60,6 @@
         right: 0;
         height: 3px;
         background: linear-gradient(90deg, #00A693, #00BFA5);
-    }
-    
-    /* Tarjeta de resultado compacta */
-    .result-card-container {
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid rgba(233, 30, 99, 0.1);
-        position: relative;
-        overflow: hidden;
-        flex: 0.8;
-    }
-    
-    .result-card-container::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: linear-gradient(90deg, #E91E63, #F06292);
     }
     
     /* Columna derecha - Estadísticas */
@@ -127,7 +104,8 @@
         overflow: hidden;
         border: 1px solid rgba(0, 166, 147, 0.2);
         min-height: 200px;
-        max-height: 250px;
+        max-height: 300px;
+        position: relative;
     }
     
     /* Controles compactos */
@@ -194,48 +172,16 @@
         background: #dc3545;
     }
     
-    /* Tarjeta de resultado */
-    .result-card {
-        background: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        text-align: center;
-        border: 1px solid transparent;
-        transition: all 0.3s ease;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: 120px;
+    /* NUEVO: Estado de pausa */
+    .status-paused {
+        background: #ffc107;
+        animation: pausePulse 1.5s infinite;
     }
     
-    .success {
-        border-color: #28a745;
-        background: linear-gradient(135deg, rgba(40, 167, 69, 0.1), rgba(40, 167, 69, 0.05));
-    }
-    
-    .error {
-        border-color: #dc3545;
-        background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
-    }
-    
-    .warning {
-        border-color: #ffc107;
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
-    }
-    
-    .loading {
-        border-color: #00A693;
-        background: linear-gradient(135deg, rgba(0, 166, 147, 0.1), rgba(0, 166, 147, 0.05));
-    }
-    
-    .foto-invitado {
-        width: 60px;
-        height: 60px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin: 8px auto;
-        border: 2px solid #00A693;
+    @keyframes pausePulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
     }
     
     /* Grid de estadísticas compacto */
@@ -309,6 +255,310 @@
         transform: translateX(3px);
     }
     
+    /* MODAL DE RESULTADOS */
+    .scan-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .scan-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        transform: scale(0.8) translateY(50px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .scan-modal.show .modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    /* Decoración del modal según el tipo */
+    .modal-content::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #00A693, #00BFA5);
+        transition: all 0.3s ease;
+    }
+    
+    .modal-content.success::before {
+        background: linear-gradient(90deg, #28a745, #20c997);
+    }
+    
+    .modal-content.error::before {
+        background: linear-gradient(90deg, #dc3545, #e74c3c);
+    }
+    
+    .modal-content.warning::before {
+        background: linear-gradient(90deg, #ffc107, #ffca2c);
+    }
+    
+    /* Icono del resultado */
+    .result-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2.5rem;
+        color: white;
+        position: relative;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    
+    .result-icon.success {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        animation: successPulse 0.6s ease;
+    }
+    
+    .result-icon.error {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+        animation: errorShake 0.6s ease;
+    }
+    
+    .result-icon.warning {
+        background: linear-gradient(135deg, #ffc107, #ffca2c);
+        animation: warningBounce 0.8s ease;
+    }
+    
+    .result-icon.loading {
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        animation: loadingSpin 1s linear infinite;
+    }
+    
+    @keyframes successPulse {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    
+    @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    
+    @keyframes warningBounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes loadingSpin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Contenido del modal */
+    .result-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .result-message {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 20px;
+        line-height: 1.4;
+    }
+    
+    .invitado-details {
+        background: linear-gradient(135deg, rgba(0, 166, 147, 0.05), rgba(0, 166, 147, 0.1));
+        border-radius: 15px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid rgba(0, 166, 147, 0.2);
+    }
+    
+    .foto-invitado-modal {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin: 0 auto 15px;
+        border: 3px solid #00A693;
+        box-shadow: 0 4px 15px rgba(0, 166, 147, 0.3);
+        display: block;
+    }
+    
+    .invitado-nombre-modal {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .invitado-puesto-modal {
+        font-size: 1rem;
+        color: #666;
+        margin-bottom: 10px;
+    }
+    
+    .invitado-hora-modal {
+        font-size: 0.9rem;
+        color: #00A693;
+        font-weight: 600;
+    }
+    
+    /* Botones del modal */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin-top: 25px;
+    }
+    
+    .modal-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .modal-btn-primary {
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 166, 147, 0.3);
+    }
+    
+    .modal-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 166, 147, 0.4);
+    }
+    
+    .modal-btn-secondary {
+        background: #f8f9fa;
+        color: #666;
+        border: 2px solid #e9ecef;
+    }
+    
+    .modal-btn-secondary:hover {
+        background: #e9ecef;
+        transform: translateY(-2px);
+    }
+    
+    /* Botón de cerrar */
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 1.2rem;
+        color: #666;
+    }
+    
+    .modal-close:hover {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+        transform: scale(1.1);
+    }
+    
+    /* Auto-close timer */
+    .auto-close-timer {
+        position: absolute;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .timer-bar {
+        width: 40px;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .timer-progress {
+        height: 100%;
+        background: #00A693;
+        width: 100%;
+        transform-origin: left;
+        animation: timerProgress 5s linear forwards;
+    }
+    
+    @keyframes timerProgress {
+        from { transform: scaleX(1); }
+        to { transform: scaleX(0); }
+    }
+    
+    /* Indicador visual cuando está pausado */
+    .scanner-paused-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 193, 7, 0.1);
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: #856404;
+        z-index: 10;
+        font-size: 1.2rem;
+    }
+    
+    .scanner-paused-overlay.show {
+        display: flex;
+    }
+    
     /* Animaciones */
     @keyframes pulse {
         0% { opacity: 1; }
@@ -328,13 +578,8 @@
     }
     
     .camera-card,
-    .result-card-container,
     .stats-column {
         animation: fadeInUp 0.6s ease forwards;
-    }
-    
-    .result-card-container {
-        animation-delay: 0.1s;
     }
     
     .stats-column {
@@ -346,16 +591,6 @@
         .scanner-grid {
             grid-template-columns: 1fr;
             gap: 12px;
-        }
-        
-        .scanner-column {
-            flex-direction: row;
-            height: auto;
-        }
-        
-        .camera-card,
-        .result-card-container {
-            flex: 1;
         }
         
         .stats-grid {
@@ -370,10 +605,6 @@
             height: auto;
         }
         
-        .scanner-column {
-            flex-direction: column;
-        }
-        
         .stats-grid {
             grid-template-columns: 1fr;
         }
@@ -382,11 +613,34 @@
             min-height: 150px;
             max-height: 200px;
         }
+        
+        .modal-content {
+            padding: 25px 20px;
+            margin: 20px;
+        }
+        
+        .result-icon {
+            width: 70px;
+            height: 70px;
+            font-size: 2rem;
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+        }
+        
+        .modal-buttons {
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .modal-btn {
+            width: 100%;
+        }
     }
     
     @media (max-width: 480px) {
         .camera-card,
-        .result-card-container,
         .stats-column {
             padding: 10px;
         }
@@ -402,12 +656,16 @@
 {% block content %}
 <div class="scanner-container">
     <div class="scanner-grid">
-        <!-- Columna izquierda: Cámara y resultado -->
+        <!-- Columna izquierda: Solo cámara -->
         <div class="scanner-column">
-            <!-- Sección de cámara -->
             <div class="camera-card">
                 <h3 class="section-title">📷 Escáner de Cámara</h3>
-                <div id="qr-reader"></div>
+                <div id="qr-reader">
+                    <!-- Overlay de pausa -->
+                    <div class="scanner-paused-overlay" id="pausedOverlay">
+                        ⏸️ ESCÁNER PAUSADO
+                    </div>
+                </div>
                 
                 <div class="controls">
                     <button id="start-btn" class="btn btn-primary">
@@ -421,19 +679,6 @@
                 
                 <div id="camera-status" class="camera-status">
                     Presiona "Iniciar Escáner" para comenzar
-                </div>
-            </div>
-            
-            <!-- Sección de resultados -->
-            <div class="result-card-container">
-                <h3 class="section-title">📋 Resultado del Escaneo</h3>
-                <div id="scan-result">
-                    <div class="result-card loading">
-                        <div>
-                            <p><strong>🔍 Esperando escaneo...</strong></p>
-                            <small>Coloca el código QR frente a la cámara</small>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -466,6 +711,43 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL DE RESULTADOS -->
+<div class="scan-modal" id="scanModal">
+    <div class="modal-content" id="modalContent">
+        <button class="modal-close" onclick="closeScanModal()">×</button>
+        
+        <div class="result-icon" id="resultIcon">
+            <span id="iconSymbol">🔍</span>
+        </div>
+        
+        <h2 class="result-title" id="resultTitle">Procesando...</h2>
+        <p class="result-message" id="resultMessage">Verificando código QR...</p>
+        
+        <div class="invitado-details" id="invitadoDetails" style="display: none;">
+            <img id="fotoInvitado" class="foto-invitado-modal" style="display: none;">
+            <div class="invitado-nombre-modal" id="nombreInvitado"></div>
+            <div class="invitado-puesto-modal" id="puestoInvitado"></div>
+            <div class="invitado-hora-modal" id="horaInvitado"></div>
+        </div>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-primary" onclick="closeScanModal()">
+                ✅ Continuar Escaneando
+            </button>
+            <button class="modal-btn modal-btn-secondary" onclick="goToDashboard()">
+                📊 Ver Dashboard
+            </button>
+        </div>
+        
+        <div class="auto-close-timer" id="autoCloseTimer" style="display: none;">
+            <span>Cerrando en 5s</span>
+            <div class="timer-bar">
+                <div class="timer-progress"></div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -475,7 +757,10 @@
 <script>
     let html5QrCode;
     let isScanning = false;
+    let isPaused = false;  // 🆕 NUEVA VARIABLE: Control de pausa
     let pollingInterval;
+    let autoCloseTimeout;
+    let pauseTimeout;      // 🆕 NUEVA VARIABLE: Timeout para reanudar automáticamente
     
     // URLs para AJAX
     const PROCESAR_QR_URL = '/procesar-qr/';
@@ -486,7 +771,8 @@
     const stopBtn = document.getElementById('stop-btn');
     const statusIndicator = document.getElementById('status-indicator');
     const cameraStatus = document.getElementById('camera-status');
-    const scanResult = document.getElementById('scan-result');
+    const scanModal = document.getElementById('scanModal');
+    const pausedOverlay = document.getElementById('pausedOverlay');
     
     // Inicializar escáner
     function initializeScanner() {
@@ -509,18 +795,19 @@
             );
             
             isScanning = true;
+            isPaused = false;  // 🆕 Asegurar que no esté pausado
             startBtn.style.display = 'none';
             stopBtn.style.display = 'inline-block';
             statusIndicator.className = 'status-indicator status-scanning';
             cameraStatus.textContent = '✅ Cámara activa - Escanea un código QR';
+            pausedOverlay.classList.remove('show');
             
-            // Iniciar polling de estadísticas
             startPolling();
             
         } catch (err) {
             console.error('Error al iniciar cámara:', err);
             cameraStatus.textContent = `❌ Error: ${err.message}`;
-            showResult('error', '❌ Error de Cámara', 'No se pudo acceder a la cámara. Verifica los permisos.');
+            showScanModal('error', '❌ Error de Cámara', 'No se pudo acceder a la cámara. Verifica los permisos.');
         }
     }
     
@@ -529,21 +816,66 @@
         try {
             await html5QrCode.stop();
             isScanning = false;
+            isPaused = false;  // 🆕 Resetear pausa
             startBtn.style.display = 'inline-block';
             stopBtn.style.display = 'none';
             statusIndicator.className = 'status-indicator status-stopped';
             cameraStatus.textContent = '⏹️ Escáner detenido';
+            pausedOverlay.classList.remove('show');
             stopPolling();
+            
+            // 🆕 Limpiar timeouts si existen
+            if (pauseTimeout) {
+                clearTimeout(pauseTimeout);
+                pauseTimeout = null;
+            }
         } catch (err) {
             console.error('Error al detener cámara:', err);
         }
     }
     
-    // Procesar QR escaneado
+    // 🆕 NUEVA FUNCIÓN: Pausar escáner temporalmente
+    function pauseScanner() {
+        if (isScanning && !isPaused) {
+            isPaused = true;
+            statusIndicator.className = 'status-indicator status-paused';
+            cameraStatus.textContent = '⏸️ Escáner pausado - Procesando resultado';
+            pausedOverlay.classList.add('show');
+            console.log('🔴 Escáner pausado temporalmente');
+        }
+    }
+    
+    // 🆕 NUEVA FUNCIÓN: Reanudar escáner
+    function resumeScanner() {
+        if (isScanning && isPaused) {
+            isPaused = false;
+            statusIndicator.className = 'status-indicator status-scanning';
+            cameraStatus.textContent = '✅ Cámara activa - Escanea un código QR';
+            pausedOverlay.classList.remove('show');
+            console.log('🟢 Escáner reanudado');
+            
+            // Limpiar timeout de reanudación automática si existe
+            if (pauseTimeout) {
+                clearTimeout(pauseTimeout);
+                pauseTimeout = null;
+            }
+        }
+    }
+    
+    // Procesar QR escaneado - MODIFICADO
     async function onScanSuccess(decodedText) {
+        // 🆕 VERIFICAR SI ESTÁ PAUSADO - NO PROCESAR
+        if (isPaused) {
+            console.log('🔴 Escáner pausado - Ignorando escaneo');
+            return;
+        }
+        
         console.log('QR escaneado:', decodedText);
         
-        showResult('loading', '⏳ Procesando...', 'Verificando código QR...');
+        // 🆕 PAUSAR INMEDIATAMENTE AL DETECTAR QR
+        pauseScanner();
+        
+        showScanModal('loading', '⏳ Procesando...', 'Verificando código QR...');
         
         try {
             const response = await fetch(PROCESAR_QR_URL, {
@@ -561,7 +893,7 @@
             const data = await response.json();
             
             if (data.success) {
-                showResult('success', '✅ ¡Acceso Autorizado!', 
+                showScanModal('success', '✅ ¡Acceso Autorizado!', 
                     `Bienvenido ${data.invitado.nombre}`, data.invitado);
                 updateStats();
             } else {
@@ -570,15 +902,15 @@
                 
                 if (data.error === 'YA_ESCANEADO') {
                     errorTitle = '⚠️ Ya Registrado';
-                    showResult('warning', errorTitle, errorMsg, data.invitado);
+                    showScanModal('warning', errorTitle, errorMsg, data.invitado);
                 } else {
-                    showResult('error', errorTitle, errorMsg);
+                    showScanModal('error', errorTitle, errorMsg);
                 }
             }
             
         } catch (error) {
             console.error('Error al procesar QR:', error);
-            showResult('error', '❌ Error de Conexión', 'No se pudo conectar con el servidor');
+            showScanModal('error', '❌ Error de Conexión', 'No se pudo conectar con el servidor');
         }
     }
     
@@ -586,41 +918,131 @@
         // No mostrar errores de escaneo constantes
     }
     
-    // Mostrar resultado en la interfaz
-    function showResult(type, title, message, invitado = null) {
-        let html = `<div class="result-card ${type}">`;
+    // FUNCIÓN PRINCIPAL: Mostrar modal de resultados - MODIFICADA
+    function showScanModal(type, title, message, invitado = null) {
+        const modal = document.getElementById('scanModal');
+        const modalContent = document.getElementById('modalContent');
+        const resultIcon = document.getElementById('resultIcon');
+        const iconSymbol = document.getElementById('iconSymbol');
+        const resultTitle = document.getElementById('resultTitle');
+        const resultMessage = document.getElementById('resultMessage');
+        const invitadoDetails = document.getElementById('invitadoDetails');
+        const autoCloseTimer = document.getElementById('autoCloseTimer');
         
-        if (invitado && invitado.foto) {
-            html += `<img src="${invitado.foto}" alt="Foto" class="foto-invitado">`;
+        // Limpiar clases previas
+        modalContent.className = 'modal-content';
+        resultIcon.className = 'result-icon';
+        
+        // Configurar según el tipo
+        switch(type) {
+            case 'success':
+                modalContent.classList.add('success');
+                resultIcon.classList.add('success');
+                iconSymbol.textContent = '✅';
+                break;
+            case 'error':
+                modalContent.classList.add('error');
+                resultIcon.classList.add('error');
+                iconSymbol.textContent = '❌';
+                break;
+            case 'warning':
+                modalContent.classList.add('warning');
+                resultIcon.classList.add('warning');
+                iconSymbol.textContent = '⚠️';
+                break;
+            case 'loading':
+                resultIcon.classList.add('loading');
+                iconSymbol.textContent = '⏳';
+                break;
         }
         
-        html += `<h3 style="font-size: 0.9rem; margin-bottom: 8px;">${title}</h3>`;
-        html += `<p style="font-size: 0.8rem; margin-bottom: 5px;"><strong>${message}</strong></p>`;
+        // Configurar contenido
+        resultTitle.textContent = title;
+        resultMessage.textContent = message;
         
+        // Mostrar detalles del invitado si existe
         if (invitado) {
-            html += `<p style="font-size: 0.75rem; margin-bottom: 3px;"><strong>Puesto:</strong> ${invitado.puesto}</p>`;
-            if (invitado.hora_entrada) {
-                html += `<p style="font-size: 0.75rem;"><strong>Hora:</strong> ${invitado.hora_entrada}</p>`;
+            invitadoDetails.style.display = 'block';
+            
+            document.getElementById('nombreInvitado').textContent = invitado.nombre || '';
+            document.getElementById('puestoInvitado').textContent = invitado.puesto || '';
+            document.getElementById('horaInvitado').textContent = invitado.hora_entrada || '';
+            
+            const fotoElement = document.getElementById('fotoInvitado');
+            if (invitado.foto) {
+                fotoElement.src = invitado.foto;
+                fotoElement.style.display = 'block';
+            } else {
+                fotoElement.style.display = 'none';
             }
+        } else {
+            invitadoDetails.style.display = 'none';
         }
         
-        html += `</div>`;
+        // Mostrar modal
+        modal.classList.add('show');
         
-        scanResult.innerHTML = html;
-        
-        // Auto-limpiar después de 5 segundos
-        setTimeout(() => {
-            if (isScanning) {
-                scanResult.innerHTML = `
-                    <div class="result-card loading">
-                        <div>
-                            <p><strong>🔍 Esperando próximo escaneo...</strong></p>
-                        </div>
-                    </div>
-                `;
-            }
-        }, 5000);
+        // 🆕 CONFIGURAR AUTO-CERRAR Y REANUDACIÓN AUTOMÁTICA
+        if (type === 'success') {
+            autoCloseTimer.style.display = 'flex';
+            
+            // Reiniciar animación
+            const timerProgress = autoCloseTimer.querySelector('.timer-progress');
+            timerProgress.style.animation = 'none';
+            timerProgress.offsetHeight; // Trigger reflow
+            timerProgress.style.animation = 'timerProgress 5s linear forwards';
+            
+            autoCloseTimeout = setTimeout(() => {
+                closeScanModal();
+            }, 5000);
+        } else if (type === 'error' || type === 'warning') {
+            // 🆕 PARA ERRORES Y WARNINGS: Auto-reanudar después de 3 segundos
+            autoCloseTimer.style.display = 'none';
+            pauseTimeout = setTimeout(() => {
+                closeScanModal();
+            }, 3000);
+        } else {
+            autoCloseTimer.style.display = 'none';
+        }
     }
+    
+    // Cerrar modal - MODIFICADO
+    function closeScanModal() {
+        const modal = document.getElementById('scanModal');
+        modal.classList.remove('show');
+        
+        // 🆕 REANUDAR ESCÁNER AL CERRAR MODAL
+        resumeScanner();
+        
+        if (autoCloseTimeout) {
+            clearTimeout(autoCloseTimeout);
+            autoCloseTimeout = null;
+        }
+        
+        if (pauseTimeout) {
+            clearTimeout(pauseTimeout);
+            pauseTimeout = null;
+        }
+    }
+    
+    // Ir al dashboard
+    function goToDashboard() {
+        window.location.href = '/dashboard/';
+    }
+    
+    // Cerrar modal al hacer clic fuera - MODIFICADO
+    document.getElementById('scanModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeScanModal();
+        }
+    });
+    
+    // Cerrar modal con ESC - MODIFICADO
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeScanModal();
+        }
+    });
     
     // Funciones de polling
     function startPolling() {
