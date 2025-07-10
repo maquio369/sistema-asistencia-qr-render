@@ -1,446 +1,245 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+
+
+{% block page_title %}
+
+{% endblock %}
+
+{% block navbar_actions %}
+<!-- Navegación específica del Dashboard -->
+<div class="user-section">
+    <div class="user-welcome">
+        <div class="user-name">{{ usuario.get_full_name|default:usuario.username }}</div>
+        <div class="user-role">{% if usuario.is_superuser %}Administrador{% else %}Usuario{% endif %}</div>
+    </div>
+    <a href="{% url 'logout' %}" class="nav-item danger">
+        🚪 Cerrar Sesión
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos del dashboard */
+    .welcome-section {
+        text-align: center;
+        margin-bottom: 50px;
+    }
+    
+    .welcome-title {
+        font-size: 2.5em;
+        color: #333;
+        font-weight: 300;
+        margin-bottom: 10px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.2em;
+        color: #666;
+        font-weight: 400;
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 25px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .dashboard-card {
+        background: white;
+        border-radius: 20px;
+        padding: 35px 25px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        border: 1px solid rgba(0, 166, 147, 0.1);
+        position: relative;
+        overflow: hidden;
+        min-height: 320px;
+    }
+    
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #00A693, #E91E63);
+        transform: scaleX(0);
+        transition: transform 0.4s ease;
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 166, 147, 0.15);
+    }
+    
+    .dashboard-card:hover::before {
+        transform: scaleX(1);
+    }
+    
+    .card-icon {
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2em;
+        transition: all 0.4s ease;
+    }
+    
+    .card-registrar .card-icon {
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        color: white;
+    }
+    
+    .card-escaner .card-icon {
+        background: linear-gradient(135deg, #E91E63, #F06292);
+        color: white;
+    }
+    
+    .card-panel .card-icon {
+        background: linear-gradient(135deg, #2196F3, #42A5F5);
+        color: white;
+    }
+    
+    .card-lista .card-icon {
+        background: linear-gradient(135deg, #FF9800, #FFB74D);
+        color: white;
+    }
+    
+    .dashboard-card:hover .card-icon {
+        transform: scale(1.1) rotate(5deg);
+    }
+    
+    .card-title {
+        font-size: 1.3em;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+    }
+    
+    .card-description {
+        color: #666;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+        line-height: 1.4;
+    }
+    
+    .card-btn {
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95em;
+        transition: all 0.3s ease;
+        display: inline-block;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .card-escaner .card-btn {
+        background: linear-gradient(135deg, #E91E63, #F06292);
+    }
+    
+    .card-panel .card-btn {
+        background: linear-gradient(135deg, #2196F3, #42A5F5);
+    }
+    
+    .card-lista .card-btn {
+        background: linear-gradient(135deg, #FF9800, #FFB74D);
+    }
+    
+    .card-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        filter: brightness(1.1);
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-            color: #333;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .header {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            padding: 25px 0;
-            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
-            margin-bottom: 40px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .geometric-logo {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-        
-        .geometric-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: rotate(45deg);
-        }
-        
-        .geometric-logo::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 25px;
-            height: 25px;
-            background: #E91E63;
-            transform: rotate(45deg);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 2.2em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
+    }
+    
+    .dashboard-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
+    .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
+    .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
+    .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    @media (max-width: 1200px) {
+        .dashboard-grid {
+            grid-template-columns: repeat(2, 1fr);
             gap: 20px;
-        }
-        
-        .user-welcome {
-            text-align: right;
-            color: white;
-        }
-        
-        .user-name {
-            font-weight: 600;
-            font-size: 1.1em;
-            margin-bottom: 3px;
-        }
-        
-        .user-role {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-        
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .logout-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-        }
-        
-        .welcome-section {
-            text-align: center;
-            margin-bottom: 50px;
         }
         
         .welcome-title {
-            font-size: 2.5em;
-            color: #333;
-            font-weight: 300;
-            margin-bottom: 10px;
+            font-size: 2em;
         }
-        
-        .welcome-subtitle {
-            font-size: 1.2em;
-            color: #666;
-            font-weight: 400;
-        }
-        
-       .dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);  /* 4 columnas iguales */
-    gap: 25px;
-    max-width: 1400px;  /* Ancho aumentado para acomodar 4 cards */
-    margin: 0 auto;
-}
-        
-       .dashboard-card {
-    background: white;
-    border-radius: 20px;
-    padding: 35px 25px;  /* Padding ajustado para cards más estrechas */
-    text-align: center;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.4s ease;
-    border: 1px solid rgba(0, 166, 147, 0.1);
-    position: relative;
-    overflow: hidden;
-    min-height: 320px;  /* Altura mínima para uniformidad */
-}
-        
-        .dashboard-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #00A693, #E91E63);
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-        
-        .dashboard-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(0, 166, 147, 0.15);
-        }
-        
-        .dashboard-card:hover::before {
-            transform: scaleX(1);
-        }
-        
-.card-icon {
-    width: 70px;  /* Icono ligeramente más pequeño */
-    height: 70px;
-    margin: 0 auto 20px;  /* Margen reducido */
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.2em;  /* Tamaño de icono ajustado */
-    transition: all 0.4s ease;
-}
-        
-        .card-registrar .card-icon {
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            color: white;
-        }
-        
-        .card-escaner .card-icon {
-            background: linear-gradient(135deg, #E91E63, #F06292);
-            color: white;
-        }
-        
-        .card-panel .card-icon {
-            background: linear-gradient(135deg, #2196F3, #42A5F5);
-            color: white;
-        }
-        
-        .card-lista .card-icon {
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
-            color: white;
-        }
-        
-        .dashboard-card:hover .card-icon {
-            transform: scale(1.1) rotate(5deg);
-        }
-        
-.card-title {
-    font-size: 1.3em;  /* Título ligeramente más pequeño */
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 12px;
-}
-
-.card-description {
-    color: #666;
-    margin-bottom: 20px;
-    font-size: 0.9em;  /* Texto más compacto */
-    line-height: 1.4;
-}
-
-        
-        .card-btn {
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 0.95em;
-            transition: all 0.3s ease;
-            display: inline-block;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .card-escaner .card-btn {
-            background: linear-gradient(135deg, #E91E63, #F06292);
-        }
-        
-        .card-panel .card-btn {
-            background: linear-gradient(135deg, #2196F3, #42A5F5);
-        }
-        
-        .card-lista .card-btn {
-            background: linear-gradient(135deg, #FF9800, #FFB74D);
-        }
-        
-        .card-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-            filter: brightness(1.1);
-        }
-        
-        .stats-summary {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 50px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-            border-top: 4px solid #00A693;
-        }
-        
-        .stats-title {
-            text-align: center;
-            font-size: 1.5em;
-            color: #333;
-            margin-bottom: 25px;
-            font-weight: 600;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-        }
-        
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-item:hover {
-            background: #00A693;
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .stat-number {
-            font-size: 2.5em;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: #00A693;
-        }
-        
-        .stat-item:hover .stat-number {
-            color: white;
-        }
-        
-        .stat-label {
-            font-size: 0.9em;
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .stat-item:hover .stat-label {
-            color: rgba(255, 255, 255, 0.9);
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .dashboard-card {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .dashboard-card:nth-child(1) { animation-delay: 0.1s; }
-        .dashboard-card:nth-child(2) { animation-delay: 0.2s; }
-        .dashboard-card:nth-child(3) { animation-delay: 0.3s; }
-        .dashboard-card:nth-child(4) { animation-delay: 0.4s; }
-        
-        @media (max-width: 1200px) {
-            .header-content {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-            
-                .dashboard-grid {
-        grid-template-columns: repeat(2, 1fr);  /* 2x2 en pantallas medianas */
-        gap: 20px;
     }
-            
-            .welcome-title {
-                font-size: 2em;
-            }
-            
-            .container {
-                padding: 0 20px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+    
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
         }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="geometric-logo"></div>
-                <div>
-                    <div class="header-title">Sistema QR</div>
-                    <div class="header-subtitle">Control de Asistencia Ejecutivo</div>
-                </div>
-            </div>
-            
-            <div class="user-info">
-                <div class="user-welcome">
-                    <div class="user-name">{{ usuario.get_full_name|default:usuario.username }}</div>
-                    <div class="user-role">{% if usuario.is_superuser %}Administrador{% else %}Usuario{% endif %}</div>
-                </div>
-                <a href="{% url 'logout' %}" class="logout-btn">Cerrar Sesión</a>
-            </div>
-        </div>
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="welcome-section">
+   
+    <p class="welcome-subtitle">Gestión integral de eventos y asistencia</p>
+</div>
+
+<!-- Acciones principales -->
+<div class="dashboard-grid">
+    <div class="dashboard-card card-registrar">
+        <div class="card-icon">📝</div>
+        <h3 class="card-title">Registrar Invitado</h3>
+        <p class="card-description">Crear nuevos invitados y generar códigos QR personalizados automáticamente</p>
+        <a href="{% url 'crear_invitado' %}" class="card-btn">Crear Invitado</a>
     </div>
     
-    <div class="container">
-        <div class="welcome-section">
-            <h1 class="welcome-title">Panel de Control</h1>
-            <p class="welcome-subtitle">Gestión integral de eventos y asistencia</p>
-        </div>
-        
-        <!-- Acciones principales -->
-        <div class="dashboard-grid">
-            <div class="dashboard-card card-registrar">
-                <div class="card-icon">📝</div>
-                <h3 class="card-title">Registrar Invitado</h3>
-                <p class="card-description">Crear nuevos invitados y generar códigos QR personalizados automáticamente</p>
-                <a href="{% url 'crear_invitado' %}" class="card-btn">Crear Invitado</a>
-            </div>
-            
-            <div class="dashboard-card card-escaner">
-                <div class="card-icon">📷</div>
-                <h3 class="card-title">Escáner QR</h3>
-                <p class="card-description">Escanear códigos QR en tiempo real para registrar asistencia al evento</p>
-                <a href="{% url 'escaner_qr' %}" class="card-btn">Abrir Escáner</a>
-            </div>
-            
-            <div class="dashboard-card card-panel">
-                <div class="card-icon">📊</div>
-                <h3 class="card-title">Panel de Control</h3>
-                <p class="card-description">Monitoreo en tiempo real con estadísticas detalladas y control administrativo</p>
-                <a href="{% url 'panel_control' %}" class="card-btn">Ver Panel</a>
-            </div>
-            
-            <div class="dashboard-card card-lista">
-                <div class="card-icon">👥</div>
-                <h3 class="card-title">Lista de Invitados</h3>
-                <p class="card-description">Visualizar todos los invitados registrados y acceder a sus códigos QR</p>
-                <a href="{% url 'lista_invitados' %}" class="card-btn">Ver Lista</a>
-            </div>
-        </div>
-        
-      
+    <div class="dashboard-card card-escaner">
+        <div class="card-icon">📷</div>
+        <h3 class="card-title">Escáner QR</h3>
+        <p class="card-description">Escanear códigos QR en tiempo real para registrar asistencia al evento</p>
+        <a href="{% url 'escaner_qr' %}" class="card-btn">Abrir Escáner</a>
     </div>
-</body>
-</html>
+    
+    <div class="dashboard-card card-panel">
+        <div class="card-icon">📊</div>
+        <h3 class="card-title">Panel de Control</h3>
+        <p class="card-description">Monitoreo en tiempo real con estadísticas detalladas y control administrativo</p>
+        <a href="{% url 'panel_control' %}" class="card-btn">Ver Panel</a>
+    </div>
+    
+    <div class="dashboard-card card-lista">
+        <div class="card-icon">👥</div>
+        <h3 class="card-title">Lista de Invitados</h3>
+        <p class="card-description">Visualizar todos los invitados registrados y acceder a sus códigos QR</p>
+        <a href="{% url 'lista_invitados' %}" class="card-btn">Ver Lista</a>
+    </div>
+</div>
+{% endblock %}
