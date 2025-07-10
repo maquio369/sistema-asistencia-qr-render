@@ -1,449 +1,458 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block page_title %}
+<div class="page-title">Panel de Control - Monitoreo Ejecutivo</div>
+{% endblock %}
+
+{% block navbar_actions %}
+<!-- Navegación específica del Panel de Control -->
+<a href="{% url 'exportar_csv' %}" class="nav-item primary">
+    📄 Exportar CSV
+</a>
+<a href="{% url 'dashboard' %}" class="nav-item">
+    ← Dashboard
+</a>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor principal ultra compacto */
+    .panel-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 20px;
+        height: calc(100vh - 130px);
+        overflow: hidden;
+    }
+    
+    /* Indicador de auto-refresh compacto */
+    .auto-refresh {
+        position: fixed;
+        top: 110px;
+        right: 20px;
+        background: rgba(255,255,255,0.95);
+        padding: 6px 10px;
+        border-radius: 15px;
+        font-size: 0.7rem;
+        color: #666;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        border: 1px solid rgba(0, 166, 147, 0.2);
+        z-index: 1000;
+    }
+    
+    .refresh-indicator {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: #28a745;
+        margin-right: 5px;
+        animation: pulse 2s infinite;
+    }
+    
+    /* Grid de estadísticas compacto */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 15px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-align: center;
+        transition: all 0.3s ease;
+        border-left: 3px solid;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-total { border-left-color: #007bff; }
+    .stat-asistentes { border-left-color: #28a745; }
+    .stat-no-asistentes { border-left-color: #dc3545; }
+    .stat-porcentaje { border-left-color: #ffc107; }
+    
+    .stat-number {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+        line-height: 1;
+    }
+    
+    .stat-total .stat-number { color: #007bff; }
+    .stat-asistentes .stat-number { color: #28a745; }
+    .stat-no-asistentes .stat-number { color: #dc3545; }
+    .stat-porcentaje .stat-number { color: #ffc107; }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.75rem;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+    
+    /* Grid de contenido principal */
+    .content-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        height: calc(100% - 80px);
+    }
+    
+    /* Paneles de sección compactos */
+    .panel-section {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .llegadas-section {
+        border-top: 3px solid #28a745;
+    }
+    
+    .pendientes-section {
+        border-top: 3px solid #dc3545;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: #333;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+        flex-shrink: 0;
+    }
+    
+    /* Contenido con scroll */
+    .panel-content {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    /* Items de invitados compactos */
+    .invitado-item {
+        display: flex;
+        align-items: center;
+        padding: 8px;
+        margin: 6px 0;
+        background: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .invitado-item:hover {
+        background: #e9ecef;
+        transform: translateX(3px);
+    }
+    
+    .llegadas-section .invitado-item {
+        border-left: 2px solid #28a745;
+    }
+    
+    .pendientes-section .invitado-item {
+        border-left: 2px solid #dc3545;
+    }
+    
+    /* Fotos mini compactas */
+    .foto-mini {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    
+    .llegadas-section .foto-mini {
+        border: 1px solid #28a745;
+    }
+    
+    .pendientes-section .foto-mini {
+        border: 1px solid #dc3545;
+    }
+    
+    .foto-placeholder {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-size: 0.9rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .llegadas-section .foto-placeholder {
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+    
+    .pendientes-section .foto-placeholder {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+    }
+    
+    /* Info de invitados compacta */
+    .invitado-info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    
+    .invitado-nombre {
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: #333;
+        font-size: 0.85rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .invitado-puesto {
+        color: #666;
+        font-size: 0.75rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .invitado-hora {
+        font-size: 0.7rem;
+        font-weight: 600;
+        margin-top: 2px;
+        line-height: 1;
+    }
+    
+    .llegadas-section .invitado-hora {
+        color: #28a745;
+    }
+    
+    /* Estado vacío compacto */
+    .empty-state {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 30px 15px;
+        font-size: 0.9rem;
+    }
+    
+    /* Contador adicional */
+    .more-count {
+        text-align: center;
+        margin-top: 10px;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        color: #666;
+        font-size: 0.8rem;
+        border: 1px solid #e9ecef;
+    }
+    
+    /* Animaciones */
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-            color: #333;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .header {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            padding: 12px 0;
-            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
-            margin-bottom: 25px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .geometric-logo {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-        
-        .geometric-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: rotate(45deg);
-        }
-        
-        .geometric-logo::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 25px;
-            height: 25px;
-            background: #E91E63;
-            transform: rotate(45deg);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 2.2em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .export-btn {
-            background: rgba(233, 30, 99, 0.2);
-            color: white;
-            border: 2px solid rgba(233, 30, 99, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .export-btn:hover {
-            background: rgba(233, 30, 99, 0.3);
-            border-color: rgba(233, 30, 99, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
+    }
+    
+    @keyframes countUp {
+        from { transform: scale(0.8); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+    
+    .stat-card {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    
+    .panel-section {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    .llegadas-section {
+        animation-delay: 0.5s;
+    }
+    
+    .pendientes-section {
+        animation-delay: 0.6s;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1200px) {
+        .content-grid {
+            grid-template-columns: 1fr;
+            gap: 12px;
         }
         
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
         }
         
-        .stat-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            text-align: center;
-            transition: all 0.3s ease;
-            border-left: 3px solid;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-total { border-left-color: #007bff; }
-        .stat-asistentes { border-left-color: #28a745; }
-        .stat-no-asistentes { border-left-color: #dc3545; }
-        .stat-porcentaje { border-left-color: #ffc107; }
-        
-        .stat-number {
-            font-size: 2em;
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-        
-        .stat-total .stat-number { color: #007bff; }
-        .stat-asistentes .stat-number { color: #28a745; }
-        .stat-no-asistentes .stat-number { color: #dc3545; }
-        .stat-porcentaje .stat-number { color: #ffc107; }
-        
-        .stat-label {
-            color: #666;
-            font-size: 0.9em;
-            font-weight: 500;
-        }
-        
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
+        .panel-container {
+            height: auto;
+            overflow: visible;
         }
         
         .panel-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-        }
-        
-        .llegadas-section {
-            border-top: 3px solid #28a745;
-        }
-        
-        .pendientes-section {
-            border-top: 3px solid #dc3545;
-        }
-        
-        .section-title {
-            font-size: 1.4em;
-            margin-bottom: 18px;
-            color: #333;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .invitado-item {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            margin: 8px 0;
-            background: #f8f9fa;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .invitado-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .llegadas-section .invitado-item {
-            border-left: 3px solid #28a745;
-        }
-        
-        .pendientes-section .invitado-item {
-            border-left: 3px solid #dc3545;
-        }
-        
-        .foto-mini {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 12px;
-        }
-        
-        .llegadas-section .foto-mini {
-            border: 2px solid #28a745;
-        }
-        
-        .pendientes-section .foto-mini {
-            border: 2px solid #dc3545;
-        }
-        
-        .foto-placeholder {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            font-size: 16px;
-            color: white;
-        }
-        
-        .llegadas-section .foto-placeholder {
-            background: linear-gradient(135deg, #28a745, #20c997);
-        }
-        
-        .pendientes-section .foto-placeholder {
-            background: linear-gradient(135deg, #dc3545, #e74c3c);
-        }
-        
-        .invitado-info {
-            flex-grow: 1;
-        }
-        
-        .invitado-nombre {
-            font-weight: 600;
-            margin-bottom: 2px;
-            color: #333;
-        }
-        
-        .invitado-puesto {
-            color: #666;
-            font-size: 0.85em;
-        }
-        
-        .invitado-hora {
-            font-size: 0.75em;
-            font-weight: 600;
-            margin-top: 2px;
-        }
-        
-        .llegadas-section .invitado-hora {
-            color: #28a745;
-        }
-        
-        .empty-state {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 40px 20px;
+            max-height: 300px;
         }
         
         .auto-refresh {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #666;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border: 1px solid rgba(0, 166, 147, 0.2);
+            position: relative;
+            top: auto;
+            right: auto;
+            margin: 10px auto;
+            display: block;
+            width: fit-content;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .panel-container {
+            padding: 5px 10px;
         }
         
-        .refresh-indicator {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: #28a745;
-            margin-right: 6px;
-            animation: pulse 2s infinite;
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 8px;
         }
         
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
+        .stat-number {
+            font-size: 1.4rem;
         }
         
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .stat-label {
+            font-size: 0.7rem;
         }
-        
-        .stat-card {
-            animation: fadeInUp 0.6s ease forwards;
-        }
-        
-        .stat-card:nth-child(1) { animation-delay: 0.1s; }
-        .stat-card:nth-child(2) { animation-delay: 0.2s; }
-        .stat-card:nth-child(3) { animation-delay: 0.3s; }
-        .stat-card:nth-child(4) { animation-delay: 0.4s; }
         
         .panel-section {
-            animation: fadeInUp 0.6s ease forwards;
+            padding: 12px;
         }
         
-        .llegadas-section {
-            animation-delay: 0.5s;
+        .invitado-item {
+            padding: 6px;
         }
         
-        .pendientes-section {
-            animation-delay: 0.6s;
+        .foto-mini,
+        .foto-placeholder {
+            width: 28px;
+            height: 28px;
+            margin-right: 8px;
         }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .header-actions {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .content-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="geometric-logo"></div>
-                <div>
-                    <div class="header-title">Panel de Control</div>
-                    <div class="header-subtitle">Monitoreo Ejecutivo en Tiempo Real</div>
-                </div>
-            </div>
-            
-            <div class="header-actions">
-                <a href="{% url 'exportar_csv' %}" class="export-btn">📄 Exportar CSV</a>
-                <a href="{% url 'dashboard' %}" class="back-btn">← Volver al Dashboard</a>
-            </div>
-        </div>
-    </div>
+    }
     
+    @media (max-width: 480px) {
+        .invitado-nombre {
+            font-size: 0.8rem;
+        }
+        
+        .invitado-puesto {
+            font-size: 0.7rem;
+        }
+        
+        .invitado-hora {
+            font-size: 0.65rem;
+        }
+    }
+    
+    /* Scrollbar personalizado */
+    .panel-content::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .panel-content::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 2px;
+    }
+    
+    .panel-content::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+    
+    .panel-content::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="panel-container">
+    <!-- Indicador de auto-refresh -->
     <div class="auto-refresh">
         <span class="refresh-indicator"></span>
         Actualización automática cada 30s
     </div>
     
-    <div class="container">
-        <!-- Estadísticas principales -->
-        <div class="stats-grid">
-            <div class="stat-card stat-total">
-                <div class="stat-number">{{ total_invitados }}</div>
-                <div class="stat-label">Total Invitados</div>
-            </div>
-            
-            <div class="stat-card stat-asistentes">
-                <div class="stat-number">{{ total_asistentes }}</div>
-                <div class="stat-label">Han Asistido</div>
-            </div>
-            
-            <div class="stat-card stat-no-asistentes">
-                <div class="stat-number">{{ total_no_asistentes }}</div>
-                <div class="stat-label">No Han Asistido</div>
-            </div>
-            
-            <div class="stat-card stat-porcentaje">
-                <div class="stat-number">{{ porcentaje_asistencia }}%</div>
-                <div class="stat-label">% de Asistencia</div>
-            </div>
+    <!-- Estadísticas principales -->
+    <div class="stats-grid">
+        <div class="stat-card stat-total">
+            <div class="stat-number">{{ total_invitados }}</div>
+            <div class="stat-label">Total Invitados</div>
         </div>
         
-        <!-- Contenido principal -->
-        <div class="content-grid">
-            <!-- Últimas llegadas -->
-            <div class="panel-section llegadas-section">
-                <h2 class="section-title">🕐 Últimas Llegadas</h2>
-                
+        <div class="stat-card stat-asistentes">
+            <div class="stat-number">{{ total_asistentes }}</div>
+            <div class="stat-label">Han Asistido</div>
+        </div>
+        
+        <div class="stat-card stat-no-asistentes">
+            <div class="stat-number">{{ total_no_asistentes }}</div>
+            <div class="stat-label">No Han Asistido</div>
+        </div>
+        
+        <div class="stat-card stat-porcentaje">
+            <div class="stat-number">{{ porcentaje_asistencia }}%</div>
+            <div class="stat-label">% de Asistencia</div>
+        </div>
+    </div>
+    
+    <!-- Contenido principal -->
+    <div class="content-grid">
+        <!-- Últimas llegadas -->
+        <div class="panel-section llegadas-section">
+            <h2 class="section-title">🕐 Últimas Llegadas</h2>
+            
+            <div class="panel-content">
                 {% if asistentes_recientes %}
                     {% for invitado in asistentes_recientes %}
                         <div class="invitado-item">
@@ -466,34 +475,34 @@
                     </div>
                 {% endif %}
             </div>
+        </div>
+        
+        <!-- Invitados pendientes -->
+        <div class="panel-section pendientes-section">
+            <h2 class="section-title">⏳ Pendientes por Llegar ({{ total_no_asistentes }})</h2>
             
-            <!-- Invitados pendientes -->
-            <div class="panel-section pendientes-section">
-                <h2 class="section-title">⏳ Pendientes por Llegar ({{ total_no_asistentes }})</h2>
-                
+            <div class="panel-content">
                 {% if no_asistentes %}
-                    <div style="max-height: 400px; overflow-y: auto;">
-                        {% for invitado in no_asistentes|slice:":10" %}
-                            <div class="invitado-item">
-                                {% if invitado.fotografia %}
-                                    <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto-mini">
-                                {% else %}
-                                    <div class="foto-placeholder">👤</div>
-                                {% endif %}
-                                
-                                <div class="invitado-info">
-                                    <div class="invitado-nombre">{{ invitado.nombre_completo }}</div>
-                                    <div class="invitado-puesto">{{ invitado.puesto_cargo }}</div>
-                                </div>
+                    {% for invitado in no_asistentes|slice:":15" %}
+                        <div class="invitado-item">
+                            {% if invitado.fotografia %}
+                                <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto-mini">
+                            {% else %}
+                                <div class="foto-placeholder">👤</div>
+                            {% endif %}
+                            
+                            <div class="invitado-info">
+                                <div class="invitado-nombre">{{ invitado.nombre_completo }}</div>
+                                <div class="invitado-puesto">{{ invitado.puesto_cargo }}</div>
                             </div>
-                        {% endfor %}
-                        
-                        {% if no_asistentes.count > 10 %}
-                            <div style="text-align: center; margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 8px; color: #666; font-size: 0.9em;">
-                                ... y {{ no_asistentes.count|add:"-10" }} más
-                            </div>
-                        {% endif %}
-                    </div>
+                        </div>
+                    {% endfor %}
+                    
+                    {% if no_asistentes.count > 15 %}
+                        <div class="more-count">
+                            ... y {{ no_asistentes.count|add:"-15" }} más
+                        </div>
+                    {% endif %}
                 {% else %}
                     <div class="empty-state">
                         <p>🎉 ¡Todos los invitados ya han llegado!</p>
@@ -502,41 +511,76 @@
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh cada 30 segundos
+    setInterval(function() {
+        location.reload();
+    }, 30000);
     
-    <script>
-        // Auto-refresh cada 30 segundos
-        setInterval(function() {
-            location.reload();
-        }, 30000);
-        
-        // Mostrar última actualización
-        console.log('Panel actualizado:', new Date().toLocaleString());
-        
-        // Animación de estadísticas al cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            const numbers = document.querySelectorAll('.stat-number');
-            numbers.forEach(number => {
-                const finalValue = number.textContent;
-                number.textContent = '0';
-                
+    // Mostrar última actualización
+    console.log('Panel actualizado:', new Date().toLocaleString());
+    
+    // Animación de estadísticas al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        const numbers = document.querySelectorAll('.stat-number');
+        numbers.forEach((number, index) => {
+            const finalValue = number.textContent;
+            number.textContent = '0';
+            
+            // Delay escalonado para cada tarjeta
+            setTimeout(() => {
                 let startValue = 0;
                 const increment = finalValue.includes('%') ? 
-                    parseInt(finalValue) / 20 : 
-                    parseInt(finalValue) / 10;
+                    parseInt(finalValue) / 15 : 
+                    parseInt(finalValue) / 12;
                 
                 const timer = setInterval(() => {
                     startValue += increment;
                     if (startValue >= parseInt(finalValue)) {
                         number.textContent = finalValue;
                         clearInterval(timer);
+                        // Efecto de "pop" al completar
+                        number.style.animation = 'countUp 0.3s ease';
                     } else {
                         number.textContent = finalValue.includes('%') ? 
                             Math.floor(startValue) + '%' : 
                             Math.floor(startValue);
                     }
-                }, 100);
-            });
+                }, 60);
+            }, index * 150);
         });
-    </script>
-</body>
-</html>
+        
+        // Efecto de actualización para items de llegadas
+        const llegadaItems = document.querySelectorAll('.llegadas-section .invitado-item');
+        llegadaItems.forEach((item, index) => {
+            item.style.animationDelay = `${0.8 + (index * 0.1)}s`;
+            item.style.animation = 'fadeInUp 0.5s ease forwards';
+        });
+        
+        // Efecto de actualización para items pendientes
+        const pendienteItems = document.querySelectorAll('.pendientes-section .invitado-item');
+        pendienteItems.forEach((item, index) => {
+            item.style.animationDelay = `${1.0 + (index * 0.05)}s`;
+            item.style.animation = 'fadeInUp 0.4s ease forwards';
+        });
+    });
+    
+    // Indicador visual de actualización
+    function showUpdateIndicator() {
+        const indicator = document.querySelector('.refresh-indicator');
+        indicator.style.animation = 'none';
+        indicator.style.background = '#ffc107';
+        setTimeout(() => {
+            indicator.style.animation = 'pulse 2s infinite';
+            indicator.style.background = '#28a745';
+        }, 1000);
+    }
+    
+    // Simular indicador de actualización cada 30 segundos
+    setInterval(showUpdateIndicator, 30000);
+</script>
+{% endblock %}
