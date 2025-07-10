@@ -1,626 +1,619 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ titulo }}</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block page_title %}
+<div class="page-title">Lista de Invitados - Gestión Completa</div>
+{% endblock %}
+
+{% block navbar_actions %}
+<!-- Navegación específica de Lista de Invitados -->
+<a href="{% url 'dashboard' %}" class="nav-item">
+    ← Dashboard
+</a>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Contenedor principal ultra compacto */
+    .lista-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 8px 20px;
+        height: calc(100vh - 130px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Sección de filtros compacta */
+    .filters-section {
+        background: white;
+        border-radius: 12px;
+        padding: 12px 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-top: 3px solid #00A693;
+        flex-shrink: 0;
+    }
+    
+    .filters-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .filter-btn {
+        padding: 6px 12px;
+        border: 1px solid rgba(0, 166, 147, 0.3);
+        border-radius: 20px;
+        background: #f8f9fa;
+        color: #333;
+        text-decoration: none;
+        font-weight: 600;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
+        color: white;
+        border-color: #00A693;
+    }
+    
+    .filter-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 166, 147, 0.2);
+    }
+    
+    .search-box {
+        padding: 6px 12px;
+        border: 1px solid rgba(0, 166, 147, 0.3);
+        border-radius: 20px;
+        background: #f8f9fa;
+        font-size: 0.8rem;
+        width: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .search-box:focus {
+        outline: none;
+        border-color: #00A693;
+        background: white;
+        box-shadow: 0 0 0 2px rgba(0, 166, 147, 0.1);
+    }
+    
+    /* Contenedor de invitados con scroll */
+    .invitados-container {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border-top: 3px solid #2196F3;
+        flex: 1;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .section-title {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+        color: #333;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f0f0;
+        flex-shrink: 0;
+    }
+    
+    /* Grid de invitados con scroll */
+    .invitados-grid {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+    }
+    
+    /* Items de invitados compactos */
+    .invitado {
+        display: flex;
+        align-items: center;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        margin-bottom: 8px;
+    }
+    
+    .invitado:hover {
+        background: #e9ecef;
+        transform: translateX(3px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .invitado.asistio {
+        border-left-color: #28a745;
+        background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(40, 167, 69, 0.02));
+    }
+    
+    .invitado.no-asistio {
+        border-left-color: #dc3545;
+        background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(220, 53, 69, 0.02));
+    }
+    
+    /* Fotos compactas */
+    .foto {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-right: 12px;
+        border: 2px solid #00A693;
+        flex-shrink: 0;
+    }
+    
+    .foto-placeholder {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00A693, #00BFA5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        font-size: 1rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    /* Info de invitados compacta */
+    .info {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    
+    .nombre {
+        font-weight: 600;
+        margin-bottom: 2px;
+        color: #333;
+        font-size: 0.9rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .puesto {
+        color: #666;
+        font-size: 0.8rem;
+        margin-bottom: 3px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .estado {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 8px;
+        display: inline-block;
+        line-height: 1;
+    }
+    
+    .estado.asistio {
+        background: rgba(40, 167, 69, 0.1);
+        color: #28a745;
+    }
+    
+    .estado.no-asistio {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+    }
+    
+    /* Sección QR compacta */
+    .qr-section {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    
+    .qr-mini {
+        width: 35px;
+        height: 35px;
+        border-radius: 6px;
+        border: 1px solid #00A693;
+    }
+    
+    .qr-placeholder {
+        width: 35px;
+        height: 35px;
+        background: #f0f0f0;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 0.6rem;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    
+    .btn-qr {
+        background: linear-gradient(135deg, #E91E63, #F06292);
+        color: white;
+        padding: 4px 8px;
+        text-decoration: none;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    
+    .btn-qr:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(233, 30, 99, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Estado vacío */
+    .empty-state {
+        text-align: center;
+        color: #666;
+        font-style: italic;
+        padding: 40px 20px;
+        font-size: 0.9rem;
+    }
+    
+    .empty-state h3 {
+        margin-bottom: 8px;
+        color: #333;
+        font-size: 1.1rem;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(15px);
         }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            min-height: 100vh;
-            color: #333;
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
-        
-        .header {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            padding: 12px 0;
-            box-shadow: 0 4px 20px rgba(0, 166, 147, 0.2);
-            margin-bottom: 25px;
-        }
-        
-        .header-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .geometric-logo {
-            width: 50px;
-            height: 50px;
-            position: relative;
-        }
-        
-        .geometric-logo::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 25px;
-            height: 25px;
-            background: rgba(255, 255, 255, 0.9);
-            transform: rotate(45deg);
-        }
-        
-        .geometric-logo::after {
-            content: '';
-            position: absolute;
-            top: 12px;
-            right: 0;
-            width: 25px;
-            height: 25px;
-            background: #E91E63;
-            transform: rotate(45deg);
-        }
-        
-        .header-title {
-            color: white;
-            font-size: 2.2em;
-            font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .header-subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1em;
-            font-weight: 500;
-            margin-top: 5px;
-        }
-        
-        .back-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 20px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-        
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            border-color: rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 30px;
-        }
-        
-        .filters-section {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            border-top: 3px solid #00A693;
-        }
-        
-        .filters-title {
-            font-size: 1.2em;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .filters-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .filter-btn {
-            padding: 10px 20px;
-            border: 2px solid rgba(0, 166, 147, 0.3);
-            border-radius: 25px;
-            background: #f8f9fa;
-            color: #333;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .filter-btn.active {
-            background: linear-gradient(135deg, #00A693 0%, #00BFA5 100%);
-            color: white;
-            border-color: #00A693;
-        }
-        
-        .filter-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 166, 147, 0.2);
-        }
-        
-        .search-box {
-            padding: 10px 15px;
-            border: 2px solid rgba(0, 166, 147, 0.3);
-            border-radius: 25px;
-            background: #f8f9fa;
-            font-size: 15px;
-            width: 100%;
-            transition: all 0.3s ease;
-        }
-        
-        .search-box:focus {
-            outline: none;
-            border-color: #00A693;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(0, 166, 147, 0.1);
-        }
-        
-        .stats-summary {
-            background: white;
-            border-radius: 15px;
-            padding: 20px 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            border-top: 3px solid #E91E63;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            text-align: center;
-        }
-        
-        .stat-item {
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-        
-        .stat-item:hover {
-            background: #00A693;
-            color: white;
-            transform: translateY(-3px);
-        }
-        
-        .stat-number {
-            font-size: 1.8em;
-            font-weight: 700;
-            margin-bottom: 5px;
-            color: #00A693;
-        }
-        
-        .stat-item:hover .stat-number {
-            color: white;
-        }
-        
-        .stat-label {
-            font-size: 0.85em;
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .stat-item:hover .stat-label {
-            color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .invitado {
+        animation: fadeInUp 0.4s ease forwards;
+    }
+    
+    .invitado:nth-child(odd) { animation-delay: 0.02s; }
+    .invitado:nth-child(even) { animation-delay: 0.04s; }
+    
+    /* Scrollbar personalizado */
+    .invitados-grid::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .invitados-grid::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+    
+    .invitados-grid::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+    }
+    
+    .invitados-grid::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 1200px) {
+        .lista-container {
+            height: auto;
+            overflow: visible;
         }
         
         .invitados-container {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
-            border-top: 3px solid #2196F3;
+            max-height: 500px;
         }
         
-        .section-title {
-            font-size: 1.4em;
-            margin-bottom: 18px;
-            color: #333;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
+        .filters-grid {
+            grid-template-columns: 1fr;
             gap: 8px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .lista-container {
+            padding: 5px 10px;
         }
         
-        .invitados-grid {
-            display: grid;
-            gap: 15px;
+        .filters-section,
+        .invitados-container {
+            padding: 10px;
         }
         
         .invitado {
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-        }
-        
-        .invitado:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .invitado.asistio {
-            border-left-color: #28a745;
-            background: linear-gradient(135deg, rgba(40, 167, 69, 0.05), rgba(40, 167, 69, 0.02));
-        }
-        
-        .invitado.no-asistio {
-            border-left-color: #dc3545;
-            background: linear-gradient(135deg, rgba(220, 53, 69, 0.05), rgba(220, 53, 69, 0.02));
-        }
-        
-        .foto {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-right: 15px;
-            border: 2px solid #00A693;
-        }
-        
-        .foto-placeholder {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #00A693, #00BFA5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            font-size: 18px;
-            color: white;
+            flex-direction: column;
+            text-align: center;
+            gap: 8px;
+            padding: 12px;
         }
         
         .info {
-            flex-grow: 1;
-        }
-        
-        .nombre {
-            font-weight: 600;
-            margin-bottom: 3px;
-            color: #333;
-        }
-        
-        .puesto {
-            color: #666;
-            font-size: 0.9em;
-            margin-bottom: 2px;
-        }
-        
-        .estado {
-            font-size: 0.8em;
-            font-weight: 600;
-            padding: 2px 8px;
-            border-radius: 12px;
-            display: inline-block;
-        }
-        
-        .estado.asistio {
-            background: rgba(40, 167, 69, 0.1);
-            color: #28a745;
-        }
-        
-        .estado.no-asistio {
-            background: rgba(220, 53, 69, 0.1);
-            color: #dc3545;
+            text-align: center;
         }
         
         .qr-section {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .qr-mini {
-            width: 60px;
-            height: 60px;
-            border-radius: 8px;
-            border: 2px solid #00A693;
-        }
-        
-        .qr-placeholder {
-            width: 60px;
-            height: 60px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            color: #666;
-            font-size: 0.8em;
-            text-align: center;
-            border: 2px solid #ddd;
+        }
+        
+        .nombre,
+        .puesto {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: initial;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .foto,
+        .foto-placeholder {
+            width: 35px;
+            height: 35px;
+        }
+        
+        .qr-mini,
+        .qr-placeholder {
+            width: 30px;
+            height: 30px;
         }
         
         .btn-qr {
-            background: linear-gradient(135deg, #E91E63, #F06292);
-            color: white;
-            padding: 8px 15px;
-            text-decoration: none;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            padding: 3px 6px;
+            font-size: 0.65rem;
         }
         
-        .btn-qr:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(233, 30, 99, 0.3);
+        .filters-section {
+            padding: 8px;
         }
         
-        .empty-state {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-            padding: 60px 20px;
+        .filter-btn {
+            padding: 5px 10px;
+            font-size: 0.75rem;
         }
-        
-        .empty-state h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .invitado {
-            animation: fadeInUp 0.4s ease forwards;
-        }
-        
-        .invitado:nth-child(odd) { animation-delay: 0.05s; }
-        .invitado:nth-child(even) { animation-delay: 0.1s; }
-        
-        @media (max-width: 768px) {
-            .header-content {
-                flex-direction: column;
-                gap: 15px;
-                text-align: center;
-            }
-            
-            .container {
-                padding: 0 15px;
-            }
-            
-            .filters-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .invitado {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-            
-            .qr-section {
-                justify-content: center;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="header-content">
-            <div class="logo-section">
-                <div class="geometric-logo"></div>
-                <div>
-                    <div class="header-title">Lista de Invitados</div>
-                    <div class="header-subtitle">Gestión Completa de Participantes</div>
-                </div>
-            </div>
-            
-            <a href="{% url 'dashboard' %}" class="back-btn">← Volver al Dashboard</a>
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lista-container">
+    <!-- Filtros y búsqueda -->
+    <div class="filters-section">
+        <div class="filters-title">🔍 Filtros y Búsqueda</div>
+        <div class="filters-grid">
+            <button class="filter-btn active" onclick="filtrarInvitados('todos')">
+                Todos los Invitados
+            </button>
+            <button class="filter-btn" onclick="filtrarInvitados('asistieron')">
+                ✅ Han Asistido
+            </button>
+            <button class="filter-btn" onclick="filtrarInvitados('no-asistieron')">
+                ❌ No Han Asistido
+            </button>
+            <input type="text" class="search-box" placeholder="🔍 Buscar por nombre o puesto..." 
+                   id="search-input" onkeyup="buscarInvitados()">
         </div>
     </div>
     
-    <div class="container">
-        <!-- Filtros y búsqueda -->
-        <div class="filters-section">
-            <div class="filters-title">🔍 Filtros y Búsqueda</div>
-            <div class="filters-grid">
-                <button class="filter-btn active" onclick="filtrarInvitados('todos')">
-                    Todos los Invitados
-                </button>
-                <button class="filter-btn" onclick="filtrarInvitados('asistieron')">
-                    ✅ Han Asistido
-                </button>
-                <button class="filter-btn" onclick="filtrarInvitados('no-asistieron')">
-                    ❌ No Han Asistido
-                </button>
-                <input type="text" class="search-box" placeholder="🔍 Buscar por nombre o puesto..." 
-                       id="search-input" onkeyup="buscarInvitados()">
-            </div>
-        </div>
+    <!-- Lista de invitados -->
+    <div class="invitados-container">
+        <h2 class="section-title" id="lista-titulo">👥 Todos los Invitados</h2>
         
-        <!-- Lista de invitados -->
-        <div class="invitados-container">
-            <h2 class="section-title" id="lista-titulo">👥 Todos los Invitados</h2>
-            
-            <div class="invitados-grid" id="invitados-lista">
-                {% if invitados %}
-                    {% for invitado in invitados %}
-                        <div class="invitado {% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}" 
-                             data-nombre="{{ invitado.nombre_completo|lower }}" 
-                             data-puesto="{{ invitado.puesto_cargo|lower }}"
-                             data-estado="{% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}">
-                            
-                            {% if invitado.fotografia %}
-                                <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto">
+        <div class="invitados-grid" id="invitados-lista">
+            {% if invitados %}
+                {% for invitado in invitados %}
+                    <div class="invitado {% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}" 
+                         data-nombre="{{ invitado.nombre_completo|lower }}" 
+                         data-puesto="{{ invitado.puesto_cargo|lower }}"
+                         data-estado="{% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}">
+                        
+                        {% if invitado.fotografia %}
+                            <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto">
+                        {% else %}
+                            <div class="foto-placeholder">👤</div>
+                        {% endif %}
+                        
+                        <div class="info">
+                            <div class="nombre">{{ invitado.nombre_completo }}</div>
+                            <div class="puesto">{{ invitado.puesto_cargo }}</div>
+                            <span class="estado {% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}">
+                                {% if invitado.asistio %}
+                                    ✅ Asistió - {{ invitado.hora_entrada_formateada }}
+                                {% else %}
+                                    ❌ No ha asistido
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="qr-section">
+                            {% if invitado.qr_imagen %}
+                                <img src="{{ invitado.qr_imagen.url }}" alt="QR" class="qr-mini">
                             {% else %}
-                                <div class="foto-placeholder">👤</div>
+                                <div class="qr-placeholder">Sin QR</div>
                             {% endif %}
                             
-                            <div class="info">
-                                <div class="nombre">{{ invitado.nombre_completo }}</div>
-                                <div class="puesto">{{ invitado.puesto_cargo }}</div>
-                                <span class="estado {% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}">
-                                    {% if invitado.asistio %}
-                                        ✅ Asistió - {{ invitado.hora_entrada_formateada }}
-                                    {% else %}
-                                        ❌ No ha asistido
-                                    {% endif %}
-                                </span>
-                            </div>
-                            
-                            <div class="qr-section">
-                                {% if invitado.qr_imagen %}
-                                    <img src="{{ invitado.qr_imagen.url }}" alt="QR" class="qr-mini">
-                                {% else %}
-                                    <div class="qr-placeholder">Sin QR</div>
-                                {% endif %}
-                                
-                                <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn-qr">Ver QR</a>
-                            </div>
+                            <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn-qr">Ver QR</a>
                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div class="empty-state">
-                        <h3>📭 No hay invitados registrados</h3>
-                        <p>Comienza agregando invitados desde el panel principal</p>
                     </div>
-                {% endif %}
-            </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <h3>📭 No hay invitados registrados</h3>
+                    <p>Comienza agregando invitados desde el panel principal</p>
+                </div>
+            {% endif %}
         </div>
     </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Calcular estadísticas al cargar
+    document.addEventListener('DOMContentLoaded', function() {
+        calcularEstadisticas();
+        
+        // Animar entrada de elementos
+        const invitados = document.querySelectorAll('.invitado');
+        invitados.forEach((invitado, index) => {
+            invitado.style.animationDelay = `${index * 0.03}s`;
+        });
+    });
     
-    <script>
-        // Calcular estadísticas al cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            calcularEstadisticas();
-        });
+    function calcularEstadisticas() {
+        const invitados = document.querySelectorAll('.invitado');
+        const total = invitados.length;
+        const asistieron = document.querySelectorAll('.invitado.asistio').length;
+        const noAsistieron = total - asistieron;
+        const porcentaje = total > 0 ? Math.round((asistieron / total) * 100) : 0;
         
-        function calcularEstadisticas() {
-            const invitados = document.querySelectorAll('.invitado');
-            const total = invitados.length;
-            const asistieron = document.querySelectorAll('.invitado.asistio').length;
-            const noAsistieron = total - asistieron;
-            const porcentaje = total > 0 ? Math.round((asistieron / total) * 100) : 0;
-            
-            document.getElementById('total-count').textContent = total;
-            document.getElementById('asistieron-count').textContent = asistieron;
-            document.getElementById('no-asistieron-count').textContent = noAsistieron;
-            document.getElementById('porcentaje-count').textContent = porcentaje + '%';
-        }
+        // Actualizar contador en el título si existe
+        const titulo = document.getElementById('lista-titulo');
+        const contadorActual = titulo.textContent;
         
-        function filtrarInvitados(filtro) {
-            const invitados = document.querySelectorAll('.invitado');
-            const botones = document.querySelectorAll('.filter-btn');
-            const titulo = document.getElementById('lista-titulo');
+        console.log(`Estadísticas: ${total} total, ${asistieron} asistieron, ${noAsistieron} no asistieron, ${porcentaje}% asistencia`);
+    }
+    
+    function filtrarInvitados(filtro) {
+        const invitados = document.querySelectorAll('.invitado');
+        const botones = document.querySelectorAll('.filter-btn');
+        const titulo = document.getElementById('lista-titulo');
+        
+        // Actualizar botones activos
+        botones.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        
+        // Filtrar invitados
+        let contador = 0;
+        invitados.forEach(invitado => {
+            const estado = invitado.dataset.estado;
+            let mostrar = false;
             
-            // Actualizar botones activos
-            botones.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Filtrar invitados
-            let contador = 0;
-            invitados.forEach(invitado => {
-                const estado = invitado.dataset.estado;
-                let mostrar = false;
-                
-                switch(filtro) {
-                    case 'todos':
-                        mostrar = true;
-                        titulo.innerHTML = '👥 Todos los Invitados';
-                        break;
-                    case 'asistieron':
-                        mostrar = (estado === 'asistio');
-                        titulo.innerHTML = '✅ Invitados que Han Asistido';
-                        break;
-                    case 'no-asistieron':
-                        mostrar = (estado === 'no-asistio');
-                        titulo.innerHTML = '❌ Invitados que No Han Asistido';
-                        break;
-                }
-                
-                if (mostrar) {
-                    invitado.style.display = 'flex';
-                    contador++;
-                } else {
-                    invitado.style.display = 'none';
-                }
-            });
-            
-            // Mostrar mensaje si no hay resultados
-            const container = document.getElementById('invitados-lista');
-            let emptyMessage = container.querySelector('.empty-filter');
-            
-            if (contador === 0 && filtro !== 'todos') {
-                if (!emptyMessage) {
-                    emptyMessage = document.createElement('div');
-                    emptyMessage.className = 'empty-state empty-filter';
-                    emptyMessage.innerHTML = '<h3>📭 No hay invitados en esta categoría</h3>';
-                    container.appendChild(emptyMessage);
-                }
-                emptyMessage.style.display = 'block';
-            } else if (emptyMessage) {
-                emptyMessage.style.display = 'none';
+            switch(filtro) {
+                case 'todos':
+                    mostrar = true;
+                    titulo.innerHTML = '👥 Todos los Invitados';
+                    break;
+                case 'asistieron':
+                    mostrar = (estado === 'asistio');
+                    titulo.innerHTML = '✅ Invitados que Han Asistido';
+                    break;
+                case 'no-asistieron':
+                    mostrar = (estado === 'no-asistio');
+                    titulo.innerHTML = '❌ Invitados que No Han Asistido';
+                    break;
             }
-        }
-        
-        function buscarInvitados() {
-            const busqueda = document.getElementById('search-input').value.toLowerCase();
-            const invitados = document.querySelectorAll('.invitado');
             
-            invitados.forEach(invitado => {
-                const nombre = invitado.dataset.nombre;
-                const puesto = invitado.dataset.puesto;
-                
-                if (nombre.includes(busqueda) || puesto.includes(busqueda)) {
-                    invitado.style.display = 'flex';
-                } else {
-                    invitado.style.display = 'none';
-                }
-            });
+            if (mostrar) {
+                invitado.style.display = 'flex';
+                contador++;
+                // Re-animar elementos visibles
+                invitado.style.animation = 'fadeInUp 0.3s ease forwards';
+            } else {
+                invitado.style.display = 'none';
+            }
+        });
+        
+        // Mostrar mensaje si no hay resultados
+        const container = document.getElementById('invitados-lista');
+        let emptyMessage = container.querySelector('.empty-filter');
+        
+        if (contador === 0 && filtro !== 'todos') {
+            if (!emptyMessage) {
+                emptyMessage = document.createElement('div');
+                emptyMessage.className = 'empty-state empty-filter';
+                emptyMessage.innerHTML = '<h3>📭 No hay invitados en esta categoría</h3>';
+                container.appendChild(emptyMessage);
+            }
+            emptyMessage.style.display = 'block';
+        } else if (emptyMessage) {
+            emptyMessage.style.display = 'none';
         }
         
-        // Limpiar búsqueda al cambiar filtro
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.getElementById('search-input').value = '';
-            });
+        // Actualizar título con contador
+        titulo.innerHTML += ` (${contador})`;
+    }
+    
+    function buscarInvitados() {
+        const busqueda = document.getElementById('search-input').value.toLowerCase();
+        const invitados = document.querySelectorAll('.invitado');
+        let contador = 0;
+        
+        invitados.forEach(invitado => {
+            const nombre = invitado.dataset.nombre;
+            const puesto = invitado.dataset.puesto;
+            
+            if (nombre.includes(busqueda) || puesto.includes(busqueda)) {
+                invitado.style.display = 'flex';
+                contador++;
+                // Re-animar elementos encontrados
+                invitado.style.animation = 'fadeInUp 0.3s ease forwards';
+            } else {
+                invitado.style.display = 'none';
+            }
         });
-    </script>
-</body>
-</html>
+        
+        // Actualizar título
+        const titulo = document.getElementById('lista-titulo');
+        if (busqueda.length > 0) {
+            titulo.innerHTML = `🔍 Resultados de búsqueda (${contador})`;
+        } else {
+            titulo.innerHTML = '👥 Todos los Invitados';
+        }
+    }
+    
+    // Limpiar búsqueda al cambiar filtro
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.getElementById('search-input').value = '';
+        });
+    });
+    
+    // Efecto de hover mejorado
+    document.querySelectorAll('.invitado').forEach(invitado => {
+        invitado.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px) scale(1.02)';
+        });
+        
+        invitado.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0) scale(1)';
+        });
+    });
+</script>
+{% endblock %}
