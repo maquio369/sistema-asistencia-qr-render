@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} - Gobierno de Chiapas{% endblock %}</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gestión de asistencia mediante códigos QR">
+    <meta name="theme-color" content="#00A693">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Sistema QR">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/pwa/manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/pwa/icon-72x72.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        /* NAVBAR CON ALTURA AUMENTADA PARA LOGO MÁS GRANDE */
+        .unified-navbar {
+            background: #00A693;
+            height: 100px;                    /* INCREMENTADO de 80px a 100px */
+            max-height: 100px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 15px rgba(0, 166, 147, 0.25);
+            margin-bottom: 25px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        /* Overlay muy sutil para profundidad */
+        .unified-navbar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+        
+        .navbar-content {
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;              /* INCREMENTADO para más espacio lateral */
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 40px;                /* INCREMENTADO padding lateral */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 100px;
+        }
+        
+        /* Logo y Título - distribuido en los lados */
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 25px;                      /* INCREMENTADO para más espacio */
+            margin-left: -30px;             /* Más hacia la izquierda */
+            flex: 1;
+            min-width: 0;                   /* Permite que se comprima si es necesario */
+        }
+        
+        /* Logo con imagen real - TAMAÑO AUMENTADO */
+        .geometric-logo {
+            width: 120px;                /* INCREMENTADO de 120px a 160px */
+            height: 96px;                 /* INCREMENTADO de 96px a 128px */
+            position: relative;
+            filter: drop-shadow(0 3px 8px rgba(0,0,0,0.25));
+            background-image: url('/static/images/logo-jamach-blanco.png'); /* Ruta a la imagen del logo */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+            flex-grow: 0;
+            align-self: center;
+            max-width: none;
+            max-height: none;
+        }
+        
+        /* Eliminar los elementos geométricos anteriores */
+        .geometric-logo::before,
+        .geometric-logo::after {
+            display: none;
+        }
+        
+        .brand-info {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;                       /* INCREMENTADO espacio entre elementos */
+            text-align: left;               /* Alineación consistente */
+        }
+        
+        /* TÍTULO PRINCIPAL - Control de Asistencia Fiestas Patrias */
+        .main-event-title {
+            color: white;                   /* Blanco de la bandera */
+            font-size: 1.4em;              /* Tamaño más moderado */
+            font-weight: 700;               /* Bold pero no exagerado */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+            line-height: 1.1;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 4px solid #CE1126;    /* Rojo de la bandera */
+            border-right: 4px solid #006847;   /* Verde de la bandera */
+            padding: 0 8px;                     /* Espacio para las franjas */
+            background: rgba(255, 255, 255, 0.1);  /* Fondo sutil */
+            border-radius: 3px;
+        }
+        
+        .system-subtitle {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.8em;
+            font-weight: 500;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .page-title {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.8em;              /* INCREMENTADO de 0.7em a 0.8em */
+            font-weight: 400;
+            margin-top: 4px;                /* INCREMENTADO de 3px a 4px */
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+        
+        /* Navegación - más hacia la derecha */
+        .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 20px;                      /* INCREMENTADO para más espacio */
+            margin-right: -30px;            /* Más hacia la derecha */
+            flex-shrink: 0;
+            flex: 0 0 auto;                 /* No crece ni se encoge */
+        }
+        
+        .nav-item {
+            background: rgba(255, 255, 255, 0.12);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;              /* INCREMENTADO de 6px 14px a 8px 16px */
+            border-radius: 20px;            /* INCREMENTADO de 18px a 20px */
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85em;             /* INCREMENTADO de 0.8em a 0.85em */
+            transition: all 0.3s ease;
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            gap: 6px;                       /* INCREMENTADO de 5px a 6px */
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .nav-item.primary {
+            background: rgba(233, 30, 99, 0.8);
+            border-color: rgba(233, 30, 99, 0.9);
+        }
+        
+        .nav-item.primary:hover {
+            background: rgba(233, 30, 99, 0.9);
+            border-color: #E91E63;
+        }
+        
+        .nav-item.danger {
+            background: rgba(220, 53, 69, 0.8);
+            border-color: rgba(220, 53, 69, 0.9);
+        }
+        
+        .nav-item.danger:hover {
+            background: rgba(220, 53, 69, 0.9);
+            border-color: #dc3545;
+        }
+        
+        /* Usuario Info - texto más grande */
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-welcome {
+            text-align: right;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1em;              /* INCREMENTADO de 1em a 1.1em */
+            margin-bottom: 3px;             /* INCREMENTADO de 2px a 3px */
+        }
+        
+        .user-role {
+            font-size: 0.85em;             /* INCREMENTADO de 0.8em a 0.85em */
+            opacity: 0.9;
+            font-weight: 400;
+        }
+        
+        /* RESPONSIVE CON ALTURAS AJUSTADAS */
+        
+        /* Pantallas grandes */
+        @media (min-width: 1920px) {
+            .unified-navbar {
+                height: 120px;
+                max-height: 120px;
+            }
+            .navbar-content {
+                height: 120px;
+                max-height: 120px;
+                padding: 0 60px;
+            }
+            .logo-section {
+                height: 120px;
+                max-height: 120px;
+                margin-left: -40px;
+            }
+            .navbar-nav {
+                margin-right: -40px;
+            }
+            .geometric-logo {
+                width: 180px;
+                height: 144px;
+            }
+            .main-event-title {
+                font-size: 1.6em;          /* Más moderado */
+            }
+        }
+        
+        /* Pantallas estándar */
+        @media (min-width: 1400px) and (max-width: 1919px) {
+            .unified-navbar {
+                height: 100px;              /* INCREMENTADO de 80px a 100px */
+                max-height: 100px;
+            }
+            .navbar-content {
+                padding: 0 50px;            /* Más padding */
+            }
+            .logo-section {
+                margin-left: -35px;
+            }
+            .navbar-nav {
+                margin-right: -35px;
+            }
+        }
+        
+        /* Laptops grandes */
+        @media (min-width: 1200px) and (max-width: 1399px) {
+            .unified-navbar {
+                height: 95px;               /* INCREMENTADO de 75px a 95px */
+                max-height: 95px;
+            }
+            .navbar-content {
+                height: 95px;
+                max-height: 95px;
+                padding: 0 45px;
+            }
+            .logo-section {
+                height: 95px;
+                max-height: 95px;
+                margin-left: -30px;
+            }
+            .navbar-nav {
+                margin-right: -30px;
+            }
+            .main-event-title {
+                font-size: 1.5em;          /* Ajustado moderadamente */
+            }
+        }
+        
+        /* Laptops medianos */
+        @media (min-width: 992px) and (max-width: 1199px) {
+            .unified-navbar {
+                height: 85px;               /* INCREMENTADO de 70px a 85px */
+                max-height: 85px;
+            }
+            .navbar-content {
+                height: 85px;
+                max-height: 85px;
+                padding: 0 40px;
+            }
+            .logo-section {
+                height: 85px;
+                max-height: 85px;
+                margin-left: -25px;
+                gap: 20px;
+            }
+            .navbar-nav {
+                margin-right: -25px;
+            }
+            .geometric-logo {
+                width: 140px;               /* Ajustado para laptops medianos */
+                height: 112px;
+            }
+            .main-event-title {
+                font-size: 1.3em;          /* Ajustado para laptops medianos */
+            }
+        }
+        
+        /* Tablets horizontales */
+        @media (min-width: 769px) and (max-width: 991px) {
+            .unified-navbar {
+                height: 80px;               /* INCREMENTADO de 65px a 80px */
+                max-height: 80px;
+            }
+            .navbar-content {
+                height: 80px;
+                max-height: 80px;
+                padding: 0 35px;
+            }
+            .logo-section {
+                height: 80px;
+                max-height: 80px;
+                margin-left: -20px;
+                gap: 15px;
+            }
+            .navbar-nav {
+                margin-right: -20px;
+            }
+            .geometric-logo {
+                width: 120px;               /* Ajustado para tablets */
+                height: 96px;
+            }
+            .main-event-title {
+                font-size: 1.2em;          /* Ajustado para tablets */
+            }
+        }
+        
+        /* Tablets y móviles grandes */
+        @media (max-width: 768px) {
+            .unified-navbar {
+                height: 85px;               /* INCREMENTADO para acomodar título principal */
+                max-height: 85px;
+                margin-bottom: 15px;
+            }
+            
+            .unified-navbar::before {
+                background: rgba(0, 0, 0, 0.08);
+            }
+            
+            .navbar-content {
+                flex-direction: row;        /* MANTENER horizontal en móviles */
+                gap: 15px;
+                text-align: left;
+                padding: 15px 25px;
+                height: 85px;
+                max-height: 85px;
+                justify-content: space-between;
+            }
+            
+            .logo-section {
+                flex-direction: row;
+                gap: 15px;
+                height: auto;
+                max-height: none;
+                flex: 1;
+                margin-left: -15px;
+            }
+            
+            .navbar-nav {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                gap: 8px;
+                margin-right: -15px;
+                flex: 0 0 auto;
+            }
+            
+            .nav-item {
+                padding: 5px 10px;
+                font-size: 0.75em;
+            }
+            
+            .main-event-title {
+                font-size: 1.1em;          /* Tamaño moderado para móviles */
+                line-height: 1.1;
+            }
+            
+            .system-subtitle {
+                font-size: 0.7em;
+            }
+            
+            .user-section {
+                flex-direction: row;
+                gap: 12px;
+                align-items: center;
+            }
+            
+            .geometric-logo {
+                width: 60px;
+                height: 48px;
+                background-size: contain;
+                flex-shrink: 0;
+            }
+        }
+        
+        /* Móviles pequeños */
+        @media (max-width: 480px) {
+            .unified-navbar {
+                min-height: 80px;           /* INCREMENTADO para acomodar título */
+                padding: 0.5rem 0;
+            }
+            
+            .navbar-content {
+                padding: 12px 20px;
+                min-height: 80px;
+                gap: 10px;
+                flex-direction: column;     /* Vertical en móviles pequeños */
+                text-align: center;
+            }
+            
+            .logo-section {
+                margin-left: 0;            /* Centrado */
+                justify-content: center;
+            }
+            
+            .navbar-nav {
+                margin-right: 0;           /* Centrado */
+                justify-content: center;
+            }
+            
+            .main-event-title {
+                font-size: 1.0em;          /* Ajustado para móviles pequeños */
+                text-align: center;
+                padding: 0 6px;             /* Padding más pequeño */
+            }
+            
+            .system-subtitle {
+                font-size: 0.65em;
+            }
+            
+            .nav-item {
+                padding: 4px 8px;
+                font-size: 0.7em;
+            }
+            
+            .geometric-logo {
+                width: 50px;
+                height: 40px;
+            }
+        }
+        
+        /* Móviles muy pequeños */
+        @media (max-width: 320px) {
+            .unified-navbar {
+                min-height: 60px;           /* INCREMENTADO de 50px a 60px */
+            }
+            
+            .navbar-content {
+                min-height: 60px;
+                padding: 8px 10px;          /* INCREMENTADO de 6px 10px */
+            }
+            
+            .government-title {
+                font-size: 1.1em;          /* INCREMENTADO de 1em a 1.1em */
+            }
+            
+            .system-subtitle {
+                font-size: 0.7em;          /* INCREMENTADO de 0.6em a 0.7em */
+            }
+        }
+        
+        /* Orientación landscape en móviles */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .unified-navbar {
+                min-height: 65px;
+            }
+            
+            .navbar-content {
+                min-height: 65px;
+                flex-direction: row;
+                justify-content: space-between;
+                gap: 12px;
+                padding: 12px 25px;
+            }
+            
+            .logo-section {
+                margin-left: -15px;
+            }
+            
+            .navbar-nav {
+                margin-right: -15px;
+            }
+            
+            .government-title {
+                font-size: 0.8em;
+            }
+            
+            .system-subtitle {
+                font-size: 0.65em;
+            }
+        }
+        
+        /* Contenido principal */
+        .main-content {
+            max-width: 1900px;
+            margin: 0 auto;
+            padding: 0 30px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 0 20px;
+            }
+        }
+        
+        /* Estilos para mensajes */
+        .alert {
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            font-weight: 500;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #2E7D32;
+            border-left-color: #4CAF50;
+        }
+        
+        .alert-error {
+            background: rgba(239, 83, 80, 0.1);
+            color: #C62828;
+            border-left-color: #EF5350;
+        }
+        
+        .alert-info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #1565C0;
+            border-left-color: #2196F3;
+        }
+        
+        /* Animaciones */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .navbar-content {
+            animation: fadeInDown 0.8s ease-out;
+        }
+        
+        /* Estilos para impresión */
+        @media print {
+            .unified-navbar {
+                display: none !important;
+            }
+            
+            .main-content {
+                max-width: none;
+                margin: 0;
+                padding: 20px;
+            }
+        }
+        
+        /* Optimización para pantallas de alta densidad */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .geometric-logo {
+                image-rendering: -webkit-optimize-contrast;
+                image-rendering: crisp-edges;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- NAVBAR UNIFICADO -->
+    <nav class="unified-navbar">
+        <div class="navbar-content">
+            <!-- Logo y Marca -->
+            <div class="logo-section">
+                <div class="geometric-logo"></div>
+                <div class="brand-info">
+                    <div class="main-event-title">Control de Asistencia Fiestas Patrias</div>
+                    <div class="system-subtitle">Gobierno de Chiapas</div>
+                    {% block page_title %}{% endblock %}
+                </div>
+            </div>
+            
+            <!-- Navegación específica por página -->
+            <div class="navbar-nav">
+                {% block navbar_actions %}
+                <!-- Navegación por defecto -->
+                <a href="{% url 'dashboard' %}" class="nav-item">
+                    🏠 Dashboard
+                </a>
+                {% endblock %}
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <!-- Mensajes del sistema -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}error{% else %}{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <!-- Auto-hide messages -->
+    <script>
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                alert.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-20px)';
+                setTimeout(function() {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 500);
+            });
+        }, 5000);
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
