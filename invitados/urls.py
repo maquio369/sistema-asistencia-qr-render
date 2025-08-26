@@ -15,4 +15,5 @@ urlpatterns = [
     path('panel/', views.panel_control, name='panel_control'),
     path('exportar-csv/', views.exportar_asistencia_csv, name='exportar_csv'),
     path('offline/', views.offline_page, name='offline'),
+    path('marcar-asistencia-manual/', views.marcar_asistencia_manual, name='marcar_asistencia_manual'),
 ]

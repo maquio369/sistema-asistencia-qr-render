@@ -200,18 +200,36 @@ class Invitado(models.Model):
         return True
 
     def marcar_asistencia(self, dispositivo=""):
-    
-      if not self.asistio:
-        # Obtener hora actual en zona horaria de México
-        mexico_tz = pytz.timezone('America/Mexico_City')
-        hora_mexico = timezone.now().astimezone(mexico_tz)
+        """Marca la asistencia del invitado de forma thread-safe - VERSIÓN CORREGIDA"""
+        from django.db import transaction
         
-        self.asistio = True
-        self.fecha_hora_entrada = hora_mexico  # ✅ Ahora guarda hora local
-        self.escaneado_por = dispositivo
-        self.save()
-        return True
-      return False
+        try:
+            with transaction.atomic():
+                # Recargar el objeto para evitar condiciones de carrera
+                invitado_actual = Invitado.objects.select_for_update().get(id=self.id)
+                
+                if invitado_actual.asistio:
+                    return False  # Ya está marcado
+                
+                # Obtener hora actual en zona horaria de México
+                mexico_tz = pytz.timezone('America/Mexico_City')
+                hora_mexico = timezone.now().astimezone(mexico_tz)
+                
+                invitado_actual.asistio = True
+                invitado_actual.fecha_hora_entrada = hora_mexico
+                invitado_actual.escaneado_por = dispositivo
+                invitado_actual.save()
+                
+                # Actualizar el objeto actual
+                self.asistio = invitado_actual.asistio
+                self.fecha_hora_entrada = invitado_actual.fecha_hora_entrada
+                self.escaneado_por = invitado_actual.escaneado_por
+                
+                return True
+                
+        except Exception as e:
+            print(f"Error al marcar asistencia para {self.nombre_completo}: {e}")
+            return False
     
     @property
     def estado_asistencia(self):
@@ -222,13 +240,15 @@ class Invitado(models.Model):
     
     @property
     def hora_entrada_formateada(self):
-   
-     if self.fecha_hora_entrada:
+        """Retorna la hora de entrada formateada en zona horaria de México - VERSIÓN MEJORADA"""
+        if not self.fecha_hora_entrada:
+            return "No registrada"
+        
         try:
             mexico_tz = pytz.timezone('America/Mexico_City')
             
+            # Si no tiene timezone info, asumir que está en UTC
             if self.fecha_hora_entrada.tzinfo is None:
-                # Sin timezone info, asumir UTC
                 utc_time = pytz.UTC.localize(self.fecha_hora_entrada)
                 hora_local = utc_time.astimezone(mexico_tz)
             else:
@@ -236,7 +256,14 @@ class Invitado(models.Model):
                 hora_local = self.fecha_hora_entrada.astimezone(mexico_tz)
             
             return hora_local.strftime("%d/%m/%Y %H:%M:%S")
+            
+        except (pytz.InvalidTimeError, ValueError, OverflowError) as e:
+            print(f"Error específico al formatear hora para {self.nombre_completo}: {e}")
+            # Fallback más seguro
+            try:
+                return self.fecha_hora_entrada.strftime("%d/%m/%Y %H:%M:%S")
+            except:
+                return "Error en fecha"
         except Exception as e:
-            print(f"Error al formatear hora: {e}")
-            return self.fecha_hora_entrada.strftime("%d/%m/%Y %H:%M:%S")
-     return "No registrada"
+            print(f"Error inesperado al formatear hora para {self.nombre_completo}: {e}")
+            return "Error desconocido"

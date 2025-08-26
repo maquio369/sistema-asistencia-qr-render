@@ -19,6 +19,7 @@ from .forms import CustomLoginForm
 from .forms import InvitadoForm
 from django.contrib import messages
 import pytz
+from django.db import transaction
 
 
 def login_view(request):
@@ -115,6 +116,38 @@ def escaner_qr(request):
 def procesar_qr(request):
     """Vista para procesar el QR escaneado vía AJAX"""
     try:
+
+        if not request.body:
+         return JsonResponse({
+            'success': False,
+            'error': 'BODY_VACIO',
+            'message': 'El cuerpo de la petición está vacío'
+        }, status=400)
+
+
+        data = json.loads(request.body)
+        token_qr = data.get('token_qr', '').strip()
+        dispositivo = data.get('dispositivo', 'Dispositivo desconocido')
+            
+        if not token_qr:
+            return JsonResponse({
+                'success': False,
+                'error': 'Token QR vacío',
+                'message': 'No se pudo leer el código QR'
+            })
+        
+        if len(token_qr) < 30 or len(token_qr) > 50:
+            return JsonResponse({
+                'success': False,
+                'error': 'TOKEN_FORMATO_INVALIDO',
+                'message': 'Formato de código QR inválido'
+            })
+
+
+
+
+
+
         data = json.loads(request.body)
         token_qr = data.get('token_qr', '').strip()
         dispositivo = data.get('dispositivo', 'Dispositivo desconocido')
@@ -207,13 +240,14 @@ def estadisticas_tiempo_real(request):
             else:
                 hora_formateada = "No registrada"
         except Exception as e:
-            print(f"Error al formatear hora: {e}")
+            print(f"Error al formatear hora para {invitado.nombre_completo}: {e}")
             hora_formateada = invitado.hora_entrada_formateada
-                
-            llegadas_data.append({
+        
+        # CORREGIDO: Siempre agregar el invitado a la lista
+        llegadas_data.append({
             'nombre': invitado.nombre_completo,
             'puesto': invitado.puesto_cargo,
-            'hora': invitado.hora_entrada_formateada,
+            'hora': hora_formateada,
             'foto': invitado.fotografia.url if invitado.fotografia else None
         })
     
@@ -364,3 +398,151 @@ def ver_invitado_qr(request, invitado_id):
     }
     
     return render(request, 'invitados/mostrar_qr.html', context)
+@csrf_exempt
+@require_POST
+@login_required
+def marcar_asistencia_manual(request):
+    """Vista para marcar asistencia manualmente desde la lista de invitados - VERSIÓN CORREGIDA"""
+    
+    # NUEVA VALIDACIÓN: Verificar que el body no esté vacío
+    if not request.body:
+        return JsonResponse({
+            'success': False,
+            'error': 'BODY_VACIO',
+            'message': 'El cuerpo de la petición está vacío'
+        }, status=400)
+    
+    try:
+        data = json.loads(request.body)
+        invitado_id = data.get('invitado_id')
+        accion = data.get('accion', 'marcar')  # 'marcar' o 'desmarcar'
+        
+        if not invitado_id:
+            return JsonResponse({
+                'success': False,
+                'error': 'ID de invitado requerido',
+                'message': 'No se proporcionó el ID del invitado'
+            })
+        
+        # NUEVA VALIDACIÓN: Verificar formato UUID
+        try:
+            import uuid
+            uuid.UUID(invitado_id)
+        except (ValueError, TypeError):
+            return JsonResponse({
+                'success': False,
+                'error': 'ID_INVALIDO',
+                'message': 'ID de invitado inválido'
+            })
+        
+        # NUEVA VALIDACIÓN: Verificar acción válida
+        if accion not in ['marcar', 'desmarcar']:
+            return JsonResponse({
+                'success': False,
+                'error': 'ACCION_INVALIDA',
+                'message': 'Acción no válida'
+            })
+        
+        # CORRECCIÓN PRINCIPAL: Usar transacciones atómicas para evitar condiciones de carrera
+        from django.db import transaction
+        
+        try:
+            with transaction.atomic():
+                # Usar select_for_update() para evitar condiciones de carrera
+                invitado = Invitado.objects.select_for_update().get(id=invitado_id)
+                
+                if accion == 'marcar':
+                    # Verificar si ya está marcado (con datos frescos de la DB)
+                    if invitado.asistio:
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'YA_MARCADO',
+                            'message': f'{invitado.nombre_completo} ya tiene su asistencia marcada',
+                            'invitado': {
+                                'id': str(invitado.id),
+                                'nombre': invitado.nombre_completo,
+                                'puesto': invitado.puesto_cargo,
+                                'asistio': invitado.asistio,
+                                'hora_entrada': invitado.hora_entrada_formateada,
+                                'foto': invitado.fotografia.url if invitado.fotografia else None
+                            }
+                        })
+                    
+                    # Marcar asistencia manualmente usando el método del modelo (que ya es thread-safe)
+                    dispositivo = f"Registro Manual - {request.user.username} - {timezone.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                    
+                    if invitado.marcar_asistencia(dispositivo):
+                        return JsonResponse({
+                            'success': True,
+                            'message': f'✅ Asistencia marcada para {invitado.nombre_completo}',
+                            'invitado': {
+                                'id': str(invitado.id),
+                                'nombre': invitado.nombre_completo,
+                                'puesto': invitado.puesto_cargo,
+                                'asistio': invitado.asistio,
+                                'hora_entrada': invitado.hora_entrada_formateada,
+                                'foto': invitado.fotografia.url if invitado.fotografia else None
+                            }
+                        })
+                    else:
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'ERROR_MARCADO',
+                            'message': 'Error al marcar la asistencia'
+                        })
+                        
+                elif accion == 'desmarcar':
+                    # Verificar si no está marcado (con datos frescos de la DB)
+                    if not invitado.asistio:
+                        return JsonResponse({
+                            'success': False,
+                            'error': 'NO_MARCADO',
+                            'message': f'{invitado.nombre_completo} no tiene asistencia marcada'
+                        })
+                    
+                    # Desmarcar asistencia de forma atómica
+                    invitado.asistio = False
+                    invitado.fecha_hora_entrada = None
+                    invitado.escaneado_por = f"Desmarcado por {request.user.username} - {timezone.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                    invitado.save()
+                    
+                    return JsonResponse({
+                        'success': True,
+                        'message': f'❌ Asistencia desmarcada para {invitado.nombre_completo}',
+                        'invitado': {
+                            'id': str(invitado.id),
+                            'nombre': invitado.nombre_completo,
+                            'puesto': invitado.puesto_cargo,
+                            'asistio': invitado.asistio,
+                            'hora_entrada': invitado.hora_entrada_formateada,
+                            'foto': invitado.fotografia.url if invitado.fotografia else None
+                        }
+                    })
+                    
+        except Invitado.DoesNotExist:
+            return JsonResponse({
+                'success': False,
+                'error': 'INVITADO_NO_ENCONTRADO',
+                'message': 'Invitado no encontrado'
+            })
+        except Exception as e:
+            print(f"Error en transacción de asistencia manual: {e}")
+            return JsonResponse({
+                'success': False,
+                'error': 'ERROR_TRANSACCION',
+                'message': 'Error al procesar la operación'
+            }, status=500)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({
+            'success': False,
+            'error': 'JSON_ERROR',
+            'message': 'Datos inválidos recibidos'
+        }, status=400)
+    except Exception as e:
+        print(f"Error inesperado en marcar_asistencia_manual: {e}")
+        return JsonResponse({
+            'success': False,
+            'error': 'ERROR_SERVIDOR',
+            'message': 'Error interno del servidor'
+        }, status=500)

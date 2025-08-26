@@ -140,6 +140,7 @@
         transition: all 0.3s ease;
         border-left: 3px solid transparent;
         margin-bottom: 8px;
+        position: relative;
     }
     
     .invitado:hover {
@@ -229,8 +230,8 @@
         color: #dc3545;
     }
     
-    /* Sección QR compacta */
-    .qr-section {
+    /* Sección de acciones */
+    .actions-section {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -278,6 +279,70 @@
         text-decoration: none;
     }
     
+    /* NUEVOS ESTILOS PARA BOTONES DE ASISTENCIA */
+    .btn-asistencia {
+        padding: 4px 8px;
+        border: none;
+        border-radius: 12px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        cursor: pointer;
+        min-width: 60px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-marcar {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .btn-marcar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+        background: linear-gradient(135deg, #20c997, #17a2b8);
+    }
+    
+    .btn-desmarcar {
+        background: linear-gradient(135deg, #ffc107, #ffca2c);
+        color: #333;
+    }
+    
+    .btn-desmarcar:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(255, 193, 7, 0.3);
+        background: linear-gradient(135deg, #ffca2c, #ffd43b);
+    }
+    
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+        pointer-events: none;
+    }
+    
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        transform: translate(-50%, -50%);
+    }
+    
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+    
     /* Estado vacío */
     .empty-state {
         text-align: center;
@@ -291,6 +356,170 @@
         margin-bottom: 8px;
         color: #333;
         font-size: 1.1rem;
+    }
+    
+    /* Modal de confirmación */
+    .confirmation-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .confirmation-modal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.1);
+        transform: scale(0.8) translateY(50px);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .confirmation-modal.show .modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2.5rem;
+        color: white;
+        background: linear-gradient(135deg, #28a745, #20c997);
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        color: #333;
+    }
+    
+    .modal-message {
+        font-size: 1.1rem;
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.4;
+    }
+    
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+    
+    .modal-btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .modal-btn-confirm {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+    }
+    
+    .modal-btn-cancel {
+        background: #f8f9fa;
+        color: #666;
+        border: 2px solid #e9ecef;
+    }
+    
+    /* Notificación toast */
+    .toast-notification {
+        position: fixed;
+        top: 30px;
+        right: 30px;
+        background: white;
+        border-radius: 15px;
+        padding: 20px 25px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        z-index: 10001;
+        transform: translateX(400px);
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        min-width: 300px;
+    }
+    
+    .toast-notification.show {
+        transform: translateX(0);
+    }
+    
+    .toast-notification.success {
+        border-left: 4px solid #28a745;
+    }
+    
+    .toast-notification.error {
+        border-left: 4px solid #dc3545;
+    }
+    
+    .toast-content {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .toast-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: white;
+    }
+    
+    .toast-icon.success {
+        background: #28a745;
+    }
+    
+    .toast-icon.error {
+        background: #dc3545;
+    }
+    
+    .toast-text {
+        flex: 1;
+    }
+    
+    .toast-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    
+    .toast-message {
+        font-size: 0.9rem;
+        color: #666;
     }
     
     /* Animaciones */
@@ -365,12 +594,14 @@
             padding: 12px;
         }
         
-        .info {
-            text-align: center;
+        .actions-section {
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         
-        .qr-section {
-            justify-content: center;
+        .info {
+            text-align: center;
         }
         
         .nombre,
@@ -394,7 +625,8 @@
             height: 30px;
         }
         
-        .btn-qr {
+        .btn-qr,
+        .btn-asistencia {
             padding: 3px 6px;
             font-size: 0.65rem;
         }
@@ -441,7 +673,8 @@
                     <div class="invitado {% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}" 
                          data-nombre="{{ invitado.nombre_completo|lower }}" 
                          data-puesto="{{ invitado.puesto_cargo|lower }}"
-                         data-estado="{% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}">
+                         data-estado="{% if invitado.asistio %}asistio{% else %}no-asistio{% endif %}"
+                         data-id="{{ invitado.id }}">
                         
                         {% if invitado.fotografia %}
                             <img src="{{ invitado.fotografia.url }}" alt="Foto" class="foto">
@@ -461,14 +694,34 @@
                             </span>
                         </div>
                         
-                        <div class="qr-section">
-                            {% if invitado.qr_imagen %}
-                                <img src="{{ invitado.qr_imagen.url }}" alt="QR" class="qr-mini">
-                            {% else %}
-                                <div class="qr-placeholder">Sin QR</div>
-                            {% endif %}
+                        <div class="actions-section">
+                            <!-- QR Code -->
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                {% if invitado.qr_imagen %}
+                                    <img src="{{ invitado.qr_imagen.url }}" alt="QR" class="qr-mini">
+                                {% else %}
+                                    <div class="qr-placeholder">Sin QR</div>
+                                {% endif %}
+                                
+                                <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn-qr">Ver QR</a>
+                            </div>
                             
-                            <a href="{% url 'mostrar_qr' invitado.token_qr %}" class="btn-qr">Ver QR</a>
+                            <!-- NUEVOS BOTONES DE ASISTENCIA MANUAL -->
+                            <div style="display: flex; align-items: center; gap: 6px; margin-left: 12px;">
+                                {% if invitado.asistio %}
+                                    <button class="btn-asistencia btn-desmarcar" 
+                                            onclick="confirmarAccion('{{ invitado.id }}', 'desmarcar', '{{ invitado.nombre_completo }}')"
+                                            title="Desmarcar asistencia">
+                                        ❌ Desmarcar
+                                    </button>
+                                {% else %}
+                                    <button class="btn-asistencia btn-marcar" 
+                                            onclick="confirmarAccion('{{ invitado.id }}', 'marcar', '{{ invitado.nombre_completo }}')"
+                                            title="Marcar asistencia manualmente">
+                                        ✅ Marcar
+                                    </button>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 {% endfor %}
@@ -481,10 +734,249 @@
         </div>
     </div>
 </div>
+
+<!-- MODAL DE CONFIRMACIÓN -->
+<div class="confirmation-modal" id="confirmationModal">
+    <div class="modal-content">
+        <div class="modal-icon" id="modalIcon">
+            <span id="iconSymbol">❓</span>
+        </div>
+        
+        <h2 class="modal-title" id="modalTitle">Confirmar Acción</h2>
+        <p class="modal-message" id="modalMessage">¿Estás seguro?</p>
+        
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-confirm" id="confirmButton">
+                Confirmar
+            </button>
+            <button class="modal-btn modal-btn-cancel" onclick="closeModal()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    // Variables globales
+    let currentAction = null;
+    let currentInvitadoId = null;
+    let currentInvitadoNombre = null;
+    
+    // CSRF Token
+    function getCSRFToken() {
+        return document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
+    }
+    
+    // Función para mostrar modal de confirmación
+    function confirmarAccion(invitadoId, accion, nombreInvitado) {
+        currentAction = accion;
+        currentInvitadoId = invitadoId;
+        currentInvitadoNombre = nombreInvitado;
+        
+        const modal = document.getElementById('confirmationModal');
+        const icon = document.getElementById('iconSymbol');
+        const title = document.getElementById('modalTitle');
+        const message = document.getElementById('modalMessage');
+        const confirmButton = document.getElementById('confirmButton');
+        
+        if (accion === 'marcar') {
+            icon.textContent = '✅';
+            title.textContent = 'Marcar Asistencia';
+            message.textContent = `¿Confirmas que ${nombreInvitado} está presente en el evento?`;
+            confirmButton.textContent = '✅ Marcar Asistencia';
+            confirmButton.className = 'modal-btn modal-btn-confirm';
+        } else {
+            icon.textContent = '❌';
+            title.textContent = 'Desmarcar Asistencia';
+            message.textContent = `¿Deseas desmarcar la asistencia de ${nombreInvitado}?`;
+            confirmButton.textContent = '❌ Desmarcar';
+            confirmButton.className = 'modal-btn modal-btn-confirm';
+        }
+        
+        modal.classList.add('show');
+    }
+    
+    // Función para cerrar modal
+    function closeModal() {
+        const modal = document.getElementById('confirmationModal');
+        modal.classList.remove('show');
+        currentAction = null;
+        currentInvitadoId = null;
+        currentInvitadoNombre = null;
+    }
+    
+    // Función para ejecutar la acción confirmada
+    async function ejecutarAccion() {
+    if (!currentAction || !currentInvitadoId) return;
+    
+    const confirmButton = document.getElementById('confirmButton');
+    
+    // Prevenir múltiples ejecuciones
+    if (confirmButton.disabled) return;
+    
+    const originalText = confirmButton.textContent;
+    
+    // Mostrar loading
+    confirmButton.classList.add('btn-loading');
+    confirmButton.textContent = 'Procesando...';
+    confirmButton.disabled = true;
+    
+    try {
+        const response = await fetch('/marcar-asistencia-manual/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCSRFToken()
+            },
+            body: JSON.stringify({
+                invitado_id: currentInvitadoId,
+                accion: currentAction
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Actualizar la interfaz
+            actualizarInvitadoEnLista(data.invitado);
+            
+            // Mostrar notificación de éxito
+            showToast('success', 'Éxito', data.message);
+            
+            // Cerrar modal
+            closeModal();
+            
+            // Recalcular estadísticas
+            calcularEstadisticas();
+        } else {
+            // Mostrar error
+            showToast('error', 'Error', data.message);
+        }
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('error', 'Error', 'Error de conexión. Inténtalo de nuevo.');
+    } finally {
+        // Siempre restaurar el botón al final
+        confirmButton.classList.remove('btn-loading');
+        confirmButton.textContent = originalText;
+        confirmButton.disabled = false;
+    }
+}
+    
+    // Función para actualizar un invitado en la lista
+    function actualizarInvitadoEnLista(invitadoData) {
+        const invitadoElement = document.querySelector(`[data-id="${invitadoData.id}"]`);
+        if (!invitadoElement) return;
+        
+        // Actualizar clases
+        if (invitadoData.asistio) {
+            invitadoElement.classList.remove('no-asistio');
+            invitadoElement.classList.add('asistio');
+            invitadoElement.setAttribute('data-estado', 'asistio');
+        } else {
+            invitadoElement.classList.remove('asistio');
+            invitadoElement.classList.add('no-asistio');
+            invitadoElement.setAttribute('data-estado', 'no-asistio');
+        }
+        
+        // Actualizar estado
+        const estadoElement = invitadoElement.querySelector('.estado');
+        if (invitadoData.asistio) {
+            estadoElement.className = 'estado asistio';
+            estadoElement.innerHTML = `✅ Asistió - ${invitadoData.hora_entrada}`;
+        } else {
+            estadoElement.className = 'estado no-asistio';
+            estadoElement.innerHTML = '❌ No ha asistido';
+        }
+        
+        // Actualizar botón de acción
+        const actionsSection = invitadoElement.querySelector('.actions-section > div:last-child');
+        if (invitadoData.asistio) {
+            actionsSection.innerHTML = `
+                <button class="btn-asistencia btn-desmarcar" 
+                        onclick="confirmarAccion('${invitadoData.id}', 'desmarcar', '${invitadoData.nombre}')"
+                        title="Desmarcar asistencia">
+                    ❌ Desmarcar
+                </button>
+            `;
+        } else {
+            actionsSection.innerHTML = `
+                <button class="btn-asistencia btn-marcar" 
+                        onclick="confirmarAccion('${invitadoData.id}', 'marcar', '${invitadoData.nombre}')"
+                        title="Marcar asistencia manualmente">
+                    ✅ Marcar
+                </button>
+            `;
+        }
+        
+        // Animación de actualización
+        invitadoElement.style.transform = 'scale(1.02)';
+        invitadoElement.style.transition = 'transform 0.3s ease';
+        setTimeout(() => {
+            invitadoElement.style.transform = 'scale(1)';
+        }, 300);
+    }
+    
+    // Función para mostrar notificaciones toast
+    function showToast(type, title, message) {
+        // Remover toast existente
+        const existingToast = document.querySelector('.toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast-notification ${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-icon ${type}">
+                    ${type === 'success' ? '✅' : '❌'}
+                </div>
+                <div class="toast-text">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Mostrar con animación
+        setTimeout(() => {
+            toast.classList.add('show');
+        }, 10);
+        
+        // Ocultar automáticamente después de 4 segundos
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(toast)) {
+                    document.body.removeChild(toast);
+                }
+            }, 400);
+        }, 4000);
+    }
+    
+    // Event listener para el botón de confirmar
+    document.getElementById('confirmButton').onclick = ejecutarAccion;
+    
+    // Cerrar modal al hacer clic fuera
+    document.getElementById('confirmationModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    // Cerrar modal con ESC
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+    
     // Calcular estadísticas al cargar
     document.addEventListener('DOMContentLoaded', function() {
         calcularEstadisticas();
