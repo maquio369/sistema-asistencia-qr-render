@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   db:
     image: postgres:15-alpine
@@ -33,6 +32,8 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=Saladin0
       - DJANGO_SETTINGS_MODULE=evento_qr.settings
+      # URL para conectar con JasperReports
+      - JASPER_SERVER_URL=http://jasperreports-server:8080
     volumes:
       - media_data:/app/media
       - static_data:/app/staticfiles
@@ -41,6 +42,7 @@ services:
         condition: service_healthy
     networks:
       - evento_qr_network
+      - shared-network  # Red compartida agregada
     command: >
       sh -c "python manage.py migrate &&
              python manage.py collectstatic --noinput &&
@@ -54,3 +56,5 @@ volumes:
 networks:
   evento_qr_network:
     driver: bridge
+  shared-network:
+    external: true  # Red externa compartida
