@@ -735,9 +735,10 @@
             <button class="modal-btn modal-btn-primary" onclick="closeScanModal()">
                 ✅ Continuar Escaneando
             </button>
-            <button class="modal-btn modal-btn-secondary" onclick="goToDashboard()">
-                📊 Ver Dashboard
+            <button class="modal-btn modal-btn-secondary" onclick="goToListaInvitados()">
+                👥 Ver Lista Invitados
             </button>
+           
         </div>
         
         <div class="auto-close-timer" id="autoCloseTimer" style="display: none;">
@@ -1026,8 +1027,9 @@
     }
     
     // Ir al dashboard
-    function goToDashboard() {
-        window.location.href = '/dashboard/';
+// Ir a la lista de invitados
+    function goToListaInvitados() {
+        window.location.href = '/invitados/';
     }
     
     // Cerrar modal al hacer clic fuera - MODIFICADO
