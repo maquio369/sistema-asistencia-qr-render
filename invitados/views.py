@@ -17,9 +17,9 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import CustomLoginForm
 from .forms import InvitadoForm
-from django.contrib import messages
 import pytz
 from django.db import transaction
+
 
 
 def login_view(request):
@@ -546,3 +546,29 @@ def marcar_asistencia_manual(request):
             'error': 'ERROR_SERVIDOR',
             'message': 'Error interno del servidor'
         }, status=500)
+    
+
+@login_required
+def generar_pdf_qr_todos(request):
+    """Vista para generar y descargar PDF con todos los códigos QR"""
+    from .utils import generar_pdf_qr_invitados
+    from datetime import datetime
+    
+    try:
+        # Generar el PDF
+        pdf_content = generar_pdf_qr_invitados()
+        
+        # Crear respuesta HTTP con el PDF
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        
+        # Nombre del archivo con fecha y hora
+        filename = f"codigos_qr_invitados_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        
+        return response
+        
+    except Exception as e:
+        messages.error(request, f'Error al generar el PDF: {str(e)}')
+        return redirect('lista_invitados')
+    
+    

@@ -95,26 +95,32 @@
         font-size: 2.2em;
         transition: all 0.4s ease;
     }
-    
-    .card-registrar .card-icon {
+
+.card-registrar .card-icon {
         background: linear-gradient(135deg, #00A693, #00BFA5);
         color: white;
     }
     
     .card-escaner .card-icon {
-        background: linear-gradient(135deg, #E91E63, #F06292);
+        background: linear-gradient(135deg, #008B7A, #00A693);
         color: white;
     }
     
     .card-panel .card-icon {
-        background: linear-gradient(135deg, #2196F3, #42A5F5);
+        background: linear-gradient(135deg, #E91E63, #26C6B0);
         color: white;
     }
     
     .card-lista .card-icon {
-        background: linear-gradient(135deg, #FF9800, #FFB74D);
+        background: linear-gradient(135deg, #00C2A8, #00A693);
         color: white;
     }
+    
+    .card-pdf .card-icon {
+        background: linear-gradient(135deg, #00A693, #4DD0E1);
+        color: white;
+    }
+
     
     .dashboard-card:hover .card-icon {
         transform: scale(1.1) rotate(5deg);
@@ -160,6 +166,13 @@
     .card-lista .card-btn {
         background: linear-gradient(135deg, #FF9800, #FFB74D);
     }
+
+
+     .card-pdf .card-btn {
+        background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    }
+
+
     
     .card-btn:hover {
         transform: translateY(-2px);
@@ -240,6 +253,13 @@
         <h3 class="card-title">Lista de Invitados</h3>
         <p class="card-description">Visualizar todos los invitados registrados y acceder a sus códigos QR</p>
         <a href="{% url 'lista_invitados' %}" class="card-btn">Ver Lista</a>
+    </div>
+    
+    <div class="dashboard-card card-pdf">
+        <div class="card-icon">📋</div>
+        <h3 class="card-title">Generar PDF QR</h3>
+        <p class="card-description">Descargar PDF con todos los códigos QR organizados para impresión</p>
+        <a href="{% url 'generar_pdf_qr_todos' %}" class="card-btn" target="_blank">Descargar PDF</a>
     </div>
 </div>
 {% endblock %}

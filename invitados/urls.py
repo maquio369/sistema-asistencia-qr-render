@@ -16,4 +16,6 @@ urlpatterns = [
     path('exportar-csv/', views.exportar_asistencia_csv, name='exportar_csv'),
     path('offline/', views.offline_page, name='offline'),
     path('marcar-asistencia-manual/', views.marcar_asistencia_manual, name='marcar_asistencia_manual'),
+    path('generar-pdf-qr/', views.generar_pdf_qr_todos, name='generar_pdf_qr_todos'),
+
 ]
