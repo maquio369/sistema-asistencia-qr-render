@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Invitado
+from .models import Invitado, UserProfile
 
 @admin.register(Invitado)
 class InvitadoAdmin(admin.ModelAdmin):
@@ -141,3 +141,15 @@ class InvitadoAdmin(admin.ModelAdmin):
             f"Se generaron {count} código(s) QR correctamente."
         )
     regenerar_qr_codes.short_description = "Regenerar códigos QR"
+
+
+    @admin.register(UserProfile)
+    class UserProfileAdmin(admin.ModelAdmin):
+        list_display = ['user', 'rol', 'fecha_creacion']
+        list_filter = ['rol', 'fecha_creacion']
+        search_fields = ['user__username', 'user__first_name', 'user__last_name']
+        
+        def get_readonly_fields(self, request, obj=None):
+            if obj:  # Editando
+                return ['user', 'fecha_creacion']
+            return ['fecha_creacion']

@@ -13,7 +13,17 @@
 <div class="user-section">
     <div class="user-welcome">
         <div class="user-name">{{ usuario.get_full_name|default:usuario.username }}</div>
-        <div class="user-role">{% if usuario.is_superuser %}Administrador{% else %}Usuario{% endif %}</div>
+        <div class="user-role">
+            {% if user_role == 'admin' %}
+                🔧 Administrador
+            {% elif user_role == 'registro' %}
+                📝 Usuario de Registro
+            {% elif user_role == 'escaneo' %}
+                📷 Usuario de Escaneo
+            {% else %}
+                👤 Usuario
+            {% endif %}
+        </div>
     </div>
     <a href="{% url 'logout' %}" class="nav-item danger">
         🚪 Cerrar Sesión
@@ -227,27 +237,37 @@
 
 <!-- Acciones principales -->
 <div class="dashboard-grid">
+    <!-- Registrar Invitado - Solo Admin y Registro -->
+    {% if user_role == 'admin' or user_role == 'registro' %}
     <div class="dashboard-card card-registrar">
         <div class="card-icon">📝</div>
         <h3 class="card-title">Registrar Invitado</h3>
         <p class="card-description">Crear nuevos invitados y generar códigos QR personalizados automáticamente</p>
         <a href="{% url 'crear_invitado' %}" class="card-btn">Crear Invitado</a>
     </div>
+    {% endif %}
     
+    <!-- Escáner QR - Solo Admin y Escaneo -->
+    {% if user_role == 'admin' or user_role == 'escaneo' %}
     <div class="dashboard-card card-escaner">
         <div class="card-icon">📷</div>
         <h3 class="card-title">Escáner QR</h3>
         <p class="card-description">Escanear códigos QR en tiempo real para registrar asistencia al evento</p>
         <a href="{% url 'escaner_qr' %}" class="card-btn">Abrir Escáner</a>
     </div>
+    {% endif %}
     
+    <!-- Panel de Control - Solo Admin y Escaneo -->
+    {% if user_role == 'admin' or user_role == 'escaneo' %}
     <div class="dashboard-card card-panel">
         <div class="card-icon">📊</div>
         <h3 class="card-title">Panel de Control</h3>
         <p class="card-description">Monitoreo en tiempo real con estadísticas detalladas y control administrativo</p>
         <a href="{% url 'panel_control' %}" class="card-btn">Ver Panel</a>
     </div>
+    {% endif %}
     
+    <!-- Lista de Invitados - Todos los roles -->
     <div class="dashboard-card card-lista">
         <div class="card-icon">👥</div>
         <h3 class="card-title">Lista de Invitados</h3>
@@ -255,11 +275,14 @@
         <a href="{% url 'lista_invitados' %}" class="card-btn">Ver Lista</a>
     </div>
     
+    <!-- Generar PDF QR - Solo Admin y Registro -->
+    {% if user_role == 'admin' or user_role == 'registro' %}
     <div class="dashboard-card card-pdf">
         <div class="card-icon">📋</div>
         <h3 class="card-title">Generar PDF QR</h3>
         <p class="card-description">Descargar PDF con todos los códigos QR organizados para impresión</p>
         <a href="{% url 'generar_pdf_qr_todos' %}" class="card-btn" target="_blank">Descargar PDF</a>
     </div>
+    {% endif %}
 </div>
 {% endblock %}

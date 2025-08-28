@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
-from .models import Invitado
+from .models import Invitado, UserProfile
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -19,7 +19,7 @@ from .forms import CustomLoginForm
 from .forms import InvitadoForm
 import pytz
 from django.db import transaction
-
+from .decorators import role_required, admin_required, registro_or_admin_required, escaneo_or_admin_required
 
 
 def login_view(request):
@@ -78,7 +78,44 @@ def dashboard(request):
     
     return render(request, 'invitados/dashboard.html', context)
 
+# Modificar por:
+@login_required
+def dashboard(request):
+    """Panel principal después del login"""
+    # Obtener o crear perfil del usuario
+    try:
+        user_profile = UserProfile.objects.get(user=request.user)
+        user_role = user_profile.rol
+    except UserProfile.DoesNotExist:
+        # Si no tiene perfil, crear uno con rol por defecto
+        user_profile = UserProfile.objects.create(
+            user=request.user,
+            rol='registro'  # rol por defecto
+        )
+        user_role = 'registro'
+    
+    # Estadísticas generales
+    total_invitados = Invitado.objects.count()
+    total_asistentes = Invitado.objects.filter(asistio=True).count()
+    porcentaje_asistencia = (total_asistentes / total_invitados * 100) if total_invitados > 0 else 0
+    
+    # Invitados recientes
+    invitados_recientes = Invitado.objects.order_by('-fecha_creacion')[:3]
+    
+    context = {
+        'titulo': 'Dashboard - Sistema QR',
+        'total_invitados': total_invitados,
+        'total_asistentes': total_asistentes,
+        'porcentaje_asistencia': round(porcentaje_asistencia, 1),
+        'invitados_recientes': invitados_recientes,
+        'usuario': request.user,
+        'user_role': user_role,
+        'user_profile': user_profile,
+    }
+    
+    return render(request, 'invitados/dashboard.html', context)
 
+@registro_or_admin_required
 def mostrar_qr(request, token):
     """Vista para mostrar QR individual"""
     invitado = get_object_or_404(Invitado, token_qr=token)
@@ -90,6 +127,7 @@ def mostrar_qr(request, token):
     
     return render(request, 'invitados/mostrar_qr.html', context)
 
+@role_required('admin', 'registro', 'escaneo')
 def lista_invitados(request):
     """Vista para listar todos los invitados"""
     invitados = Invitado.objects.all().order_by('nombre_completo')
@@ -101,6 +139,7 @@ def lista_invitados(request):
     
     return render(request, 'invitados/lista_invitados.html', context)
 
+@escaneo_or_admin_required
 def escaner_qr(request):
     """Vista principal del escáner QR"""
     context = {
@@ -257,7 +296,7 @@ def estadisticas_tiempo_real(request):
         'porcentaje_asistencia': round(porcentaje_asistencia, 1),
         'ultimas_llegadas': llegadas_data
     })
-
+@registro_or_admin_required
 def mostrar_qr(request, token):
     """Vista para mostrar QR individual"""
     invitado = get_object_or_404(Invitado, token_qr=token)
@@ -269,6 +308,7 @@ def mostrar_qr(request, token):
     
     return render(request, 'invitados/mostrar_qr.html', context)
 
+@role_required('admin', 'registro', 'escaneo')
 def lista_invitados(request):
     """Vista para listar todos los invitados"""
     invitados = Invitado.objects.all().order_by('nombre_completo')
@@ -287,7 +327,7 @@ import csv
 from datetime import datetime
 
 # Agregar esta vista
-@login_required
+@escaneo_or_admin_required
 def panel_control(request):
     """Panel de control administrativo"""
     # Estadísticas generales
@@ -316,7 +356,7 @@ def panel_control(request):
     
     return render(request, 'invitados/panel_control.html', context)
 
-@login_required
+@admin_required
 def exportar_asistencia_csv(request):
     """Exportar lista de asistencia a CSV"""
     response = HttpResponse(content_type='text/csv')
@@ -355,7 +395,7 @@ def offline_page(request):
     return render(request, 'pwa/offline.html')
 
 
-@login_required
+@registro_or_admin_required
 def crear_invitado(request):
     """Vista para crear nuevo invitado via formulario web"""
     if request.method == 'POST':
@@ -548,7 +588,7 @@ def marcar_asistencia_manual(request):
         }, status=500)
     
 
-@login_required
+@registro_or_admin_required
 def generar_pdf_qr_todos(request):
     """Vista para generar y descargar PDF con todos los códigos QR"""
     from .utils import generar_pdf_qr_invitados

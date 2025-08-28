@@ -8,6 +8,7 @@ from django.core.files.base import ContentFile
 from PIL import Image, ImageDraw
 from django.conf import settings
 import pytz
+from django.contrib.auth.models import User
 
 class Invitado(models.Model):
     # Campos principales
@@ -267,3 +268,21 @@ class Invitado(models.Model):
         except Exception as e:
             print(f"Error inesperado al formatear hora para {self.nombre_completo}: {e}")
             return "Error desconocido"
+        
+class UserProfile(models.Model):
+        ROLES = [
+            ('admin', 'Administrador'),
+            ('registro', 'Usuario de Registro'),
+            ('escaneo', 'Usuario de Escaneo'),
+        ]
+    
+        user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+        rol = models.CharField(max_length=10, choices=ROLES, default='registro')
+        fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+        class Meta:
+            verbose_name = "Perfil de Usuario"
+            verbose_name_plural = "Perfiles de Usuario"
+        
+        def __str__(self):
+            return f"{self.user.username} - {self.get_rol_display()}"
